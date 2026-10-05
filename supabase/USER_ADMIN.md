@@ -18,6 +18,10 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    Voer daarna `migrations/202610050006_allow_auth_profile_cleanup.sql` uit.
    Deze laat de Auth-server het profiel opruimen bij accountverwijdering,
    terwijl rechtstreekse profielverwijderingen door gebruikers geblokkeerd blijven.
+   Voer ook `migrations/202610050007_preserve_content_on_user_delete.sql` uit.
+   Bij accountverwijdering blijven auditregels en lesmateriaal bestaan; alleen
+   de verwijzingen naar het verwijderde account worden leeggemaakt. Dit telt
+   niet als inhoudswijziging en verhoogt de materiaalversie niet.
 
    ```sh
    supabase login
