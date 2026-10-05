@@ -207,7 +207,7 @@
         <div class="btnrow mt-10">
           <button id="btnManualPdf" type="button" disabled>Handleiding</button>
           <button id="btnPdf" type="button" disabled>Multimodaal</button>
-          <button id="btnWordgroupPdf" type="button" disabled>Woordgroep</button>
+          <button id="btnWordgroupPdf" type="button" disabled>Lessen woordgroep</button>
           <button id="btnPdfBraille" type="button" disabled>Braille</button>
         </div>
 
@@ -4292,7 +4292,7 @@ function scheduleAutosave() {
       const button = $("btnWordgroupPdf");
       try {
         if (!currentItem?.id || currentItem.item_type === "letter") return;
-        setButtonBusy(button, true, "Woordgroep bezig...");
+        setButtonBusy(button, true, "Lessen woordgroep bezig...");
         msg($("saveMsg"), "Woordgroep PDF wordt gemaakt...");
         await flushPendingItemChanges();
         const itemId = currentItem.id;

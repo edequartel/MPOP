@@ -41,7 +41,7 @@ Onder de letterlessen staat **Multimodaal**. Hier vind je pagina 1, 2 en 3 van h
 
 Onder **Multimodaal** staat **Leesboek**. Hier vind je **Braille algemeen**, de klanken en de braillepagina's van het woord. Ook deze onderdelen staan niet meer in de gewone woordweergave; de bestaande gegevens blijven behouden.
 
-De PDF-knop **Woordgroep**, tussen **Multimodaal** en **Braille**, bundelt alle letterlessen van het geselecteerde woord in de ingestelde volgorde. Elke les begint op een nieuwe pagina met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Lange teksten lopen door op vervolgpagina's.
+De PDF-knop **Lessen woordgroep**, tussen **Multimodaal** en **Braille**, bundelt alle letterlessen van het geselecteerde woord in de ingestelde volgorde. Elke les begint op een nieuwe pagina met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Lange teksten lopen door op vervolgpagina's.
 
 ## Velden invullen
 

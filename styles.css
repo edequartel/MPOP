@@ -150,14 +150,14 @@ button.busy::after {
 #letterLessonDialog { width:min(360px, calc(100vw - 48px)); box-sizing:border-box; background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:16px; }
 #letterLessonDialog::backdrop { background:rgba(0,0,0,.65); }
 .lesson-meta { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
-.lesson-goal { min-height:70px; }
+.lesson-goal { min-height:140px; }
 .lesson-table-wrap { overflow:auto; }
 .lesson-table { width:100%; border-collapse:collapse; table-layout:fixed; }
 .lesson-table th, .lesson-table td { border:1px solid var(--line); padding:8px; vertical-align:top; overflow-wrap:anywhere; }
 .lesson-table thead th { text-align:left; background:rgba(255,255,255,.06); }
 .lesson-table th:first-child { width:24%; }
 .lesson-table tbody th { text-align:left; font-size:13px; font-weight:500; }
-.lesson-table textarea { min-height:90px; border-radius:4px; resize:vertical; }
+.lesson-table textarea { min-height:180px; border-radius:4px; resize:vertical; }
 @media (max-width:800px) {
   .row { grid-template-columns:minmax(0,1fr); }
 }
@@ -170,7 +170,7 @@ button.busy::after {
 @media (max-width:600px) {
   .lesson-meta { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .lesson-table th, .lesson-table td { padding:4px; }
-  .lesson-table textarea { font-size:13px; padding:6px; min-height:120px; }
+  .lesson-table textarea { font-size:13px; padding:6px; min-height:240px; }
 }
 .title-code-row { display:flex; align-items:flex-end; gap:10px; }
 .title-code-row > div:first-child { flex:1; min-width:0; }
