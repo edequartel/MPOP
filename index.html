@@ -193,6 +193,7 @@
       </div>
 
       <div id="editor" class="hidden">
+        <h2 id="mediaHeading" class="section-title hidden"></h2>
         <div class="kpi">
           <div class="pill">Code: <span id="code" class="ok mono"></span></div>
           <div class="pill">Status: <span id="status" class="ok mono"></span></div>
@@ -206,9 +207,11 @@
         <div class="btnrow mt-10">
           <button id="btnManualPdf" type="button" disabled>Handleiding</button>
           <button id="btnPdf" type="button" disabled>Multimodaal</button>
+          <button id="btnWordgroupPdf" type="button" disabled>Woordgroep</button>
           <button id="btnPdfBraille" type="button" disabled>Braille</button>
         </div>
 
+        <div id="wordDetails">
         <label>Auteur</label>
         <input id="auteur" />
 
@@ -242,7 +245,9 @@
 
         <label>Opmerkingen</label>
         <textarea id="remarks_handleiding"></textarea>
+        </div>
 
+        <div id="mediaPages" class="hidden">
         <div class="hr"></div>
         <h2 class="section-title pdf-page-break">Pagina 1</h2>
 
@@ -429,7 +434,9 @@
 
         <label>Opmerkingen</label>
         <textarea id="remarks_3"></textarea>
+        </div>
 
+        <div id="wordBraille" class="hidden">
         <div class="hr"></div>
         <h2 class="section-title pdf-page-break">Braille algemeen</h2>
 
@@ -464,6 +471,7 @@
         <h2 class="section-title pdf-page-break">Braille pagina's</h2>
         <div id="braillePages" class="mt-10"></div>
         <div class="hr"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -491,6 +499,8 @@
     const MANUAL_PDF_URL_REMOTE = `${OWN_SERVER_BASE_URL}/api/manualpdf.php`;
     const PDF_BRAILLE_URL_LOCAL = "./api/pdfbraille.php";
     const PDF_BRAILLE_URL_REMOTE = `${OWN_SERVER_BASE_URL}/api/pdfbraille.php`;
+    const WORDGROUP_PDF_URL_LOCAL = "./api/wordgrouppdf.php";
+    const WORDGROUP_PDF_URL_REMOTE = `${OWN_SERVER_BASE_URL}/api/wordgrouppdf.php`;
     const GIT_PULL_URL = "./api/git_pull.php";
     const SHOW_FIELD_NAMES = false;
     const ELEVENLABS_STORAGE_KEYS = {
@@ -537,6 +547,7 @@
     // -----------------------------
     let sb = null;
     let currentItem = null; // full row from mpop_items
+    let currentItemView = "word";
     let currentPagesByNo = new Map(); // page_no -> page row from mpop_pages
     let sounds = [];
     let authRefreshRunning = false;
@@ -1490,8 +1501,9 @@
         msg($("listMsg"), "Loading...");
         const { data, error } = await sb
           .from("mpop_items")
-          .select("id, code, title, status, updated_at, version, sort_index, woord_groep, parent_item_id, item_type, letter, lesson_order")
-          .order("sort_index", { ascending: true });
+          .select("id, code, title, status, updated_at, version, sort_index, woord_groep, parent_item_id, item_type, letter, lesson_order, lesson_plan")
+          .order("sort_index", { ascending: true })
+          .order("id", { ascending: true });
 
         if (error) throw error;
 
@@ -1520,8 +1532,12 @@
         b.type = "button";
         b.className = "itembtn";
         b.dataset.itemId = String(it.id);
-        b.setAttribute("aria-current", String(it.id) === String(currentItem?.id) ? "true" : "false");
-        const title = it.item_type === "letter" ? `Letter ${it.letter}` : (it.title || "(no title)");
+        b.dataset.itemView = "word";
+        b.setAttribute("aria-current", String(it.id) === String(currentItem?.id) && currentItemView === "word" ? "true" : "false");
+        const lessonNumber = (key) => asText(it.lesson_plan?.[key]).trim() || "-";
+        const title = it.item_type === "letter"
+          ? `b[${lessonNumber("block")}],w[${lessonNumber("week")}],l[${lessonNumber("lesson")}] ${it.letter}`
+          : (it.title || "(no title)");
         const status = it.status || "no status";
         const label = document.createElement("span");
         label.className = "item-label";
@@ -1574,6 +1590,21 @@
             );
           }
           host.append(lessonRow);
+        }
+        for (const [view, label] of [["media", "Multimodaal"], ["leesboek", "Leesboek"]]) {
+          const sectionRow = document.createElement("div");
+          sectionRow.className = "item-row letter-lesson-row media-row";
+          const sectionButton = document.createElement("button");
+          sectionButton.type = "button";
+          sectionButton.className = "itembtn";
+          sectionButton.textContent = label;
+          sectionButton.setAttribute("aria-label", `${label} van ${it.title || it.code}`);
+          sectionButton.dataset.itemId = String(it.id);
+          sectionButton.dataset.itemView = view;
+          sectionButton.setAttribute("aria-current", String(it.id) === String(currentItem?.id) && currentItemView === view ? "true" : "false");
+          sectionButton.onclick = () => selectItem(it.id, view);
+          sectionRow.append(sectionButton);
+          host.append(sectionRow);
         }
       }
     }
@@ -1637,9 +1668,9 @@
       }
     }
 
-    async function selectItem(id) {
+    async function selectItem(id, view = "word") {
       try {
-        if (currentItem && String(currentItem.id) !== String(id)) await flushPendingItemChanges();
+        if (currentItem && (String(currentItem.id) !== String(id) || currentItemView !== view)) await flushPendingItemChanges();
         msg($("saveMsg"), "");
         const { data, error } = await sb
           .from("mpop_items")
@@ -1649,8 +1680,9 @@
         if (error) throw error;
 
         currentItem = data;
+        currentItemView = data.item_type === "letter" ? "word" : view;
         for (const button of $("itemsList").querySelectorAll("[data-item-id]")) {
-          button.setAttribute("aria-current", button.dataset.itemId === String(id) ? "true" : "false");
+          button.setAttribute("aria-current", button.dataset.itemId === String(id) && button.dataset.itemView === currentItemView ? "true" : "false");
         }
         if (data.item_type !== "letter") await loadPagesForItem(id);
         else currentPagesByNo.clear();
@@ -1669,6 +1701,7 @@
       $("editor").style.display = "none";
       $("letterLessonEditor").style.display = "none";
       currentItem = null;
+      currentItemView = "word";
       updatePdfButton();
     }
 
@@ -1719,6 +1752,13 @@ function scheduleAutosave() {
         return;
       }
       $("editor").style.display = "block";
+      const mediaView = currentItemView === "media";
+      const leesboekView = currentItemView === "leesboek";
+      $("mediaHeading").textContent = `${leesboekView ? "Leesboek" : "Multimodaal"} - ${row.title || row.code}`;
+      $("mediaHeading").classList.toggle("hidden", !mediaView && !leesboekView);
+      $("mediaPages").classList.toggle("hidden", !mediaView);
+      $("wordDetails").classList.toggle("hidden", mediaView || leesboekView);
+      $("wordBraille").classList.toggle("hidden", !leesboekView);
 
       $("code").textContent = row.code || "";
       setVal("itemCode", row.code || "");
@@ -1790,6 +1830,7 @@ function scheduleAutosave() {
     }
 
     function updatePdfButton() {
+      $("btnWordgroupPdf").disabled = !currentItem?.id || currentItem.item_type === "letter";
       $("btnPdf").disabled = !currentItem?.id;
       $("btnManualPdf").disabled = !currentItem?.id;
       $("btnPdfBraille").disabled = !currentItem?.id;
@@ -1942,7 +1983,7 @@ function scheduleAutosave() {
 
     async function reloadItem() {
       if (!currentItem) return;
-      await selectItem(currentItem.id);
+      await selectItem(currentItem.id, currentItemView);
       msg($("saveMsg"), "Reloaded.");
     }
 
@@ -4200,6 +4241,42 @@ function scheduleAutosave() {
         msg($("saveMsg"), e.message || String(e), false);
       } finally {
         setButtonBusy($("btnPdf"), false);
+        updatePdfButton();
+      }
+    };
+    $("btnWordgroupPdf").onclick = async () => {
+      const button = $("btnWordgroupPdf");
+      try {
+        if (!currentItem?.id || currentItem.item_type === "letter") return;
+        setButtonBusy(button, true, "Woordgroep bezig...");
+        msg($("saveMsg"), "Woordgroep PDF wordt gemaakt...");
+        await flushPendingItemChanges();
+        const itemId = currentItem.id;
+        const title = currentItem.title || String(itemId);
+        const token = await getFreshSupabaseAccessToken();
+        const qs = `?id=${encodeURIComponent(itemId)}`;
+        const options = { headers: { Authorization: `Bearer ${token}` } };
+        let response = await fetch(`${WORDGROUP_PDF_URL_LOCAL}${qs}`, options);
+        if (response.status === 404) response = await fetch(`${WORDGROUP_PDF_URL_REMOTE}${qs}`, options);
+        if (!response.ok) {
+          const error = await response.json().catch(() => null);
+          throw new Error(error?.error || `Woordgroep PDF maken mislukt (${response.status}).`);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        const safeTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "woordgroep";
+        link.download = `mpop-woordgroep-${safeTitle}.pdf`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        msg($("saveMsg"), "Woordgroep PDF gereed.");
+      } catch (error) {
+        msg($("saveMsg"), error.message || String(error), false);
+      } finally {
+        setButtonBusy(button, false);
         updatePdfButton();
       }
     };
