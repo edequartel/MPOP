@@ -18,7 +18,11 @@ Voer ook `migrations/202610050002_letter_lesson_defaults.sql` uit in de Supabase
 
 De letterles met de naam **default** onder de eerste woordgroep in de lijst (bijvoorbeeld **woord**) is het sjabloon. Vul daar de gewenste standaardwaarden in en sla ze op. Nieuwe letterlessen krijgen een eigen kopie van Blok, Week, Les, Doel en alle instructie- en materiaalvelden. De gekozen letter blijft de letter die je met **+** invoert. Latere wijzigingen in het sjabloon wijzigen geen bestaande lessen. Zonder dit sjabloon wordt een lege les aangemaakt.
 
-De letterknoppen tonen bijvoorbeeld **b[1],w[2],l[3] b**. Voor niet ingevulde nummers verschijnt **-**.
+De letterknoppen tonen bijvoorbeeld **b1,w2,l3 b**. Voor niet ingevulde nummers verschijnt **-**.
+
+## Letterlessen verwijderen
+
+Voer `migrations/202610050003_delete_letter_lessons.sql` uit in de Supabase SQL Editor. Admins en editors zien daarna **×** naast de pijlen van elke letterles. Bevestig het verwijderen in het dialoogvenster. Na het verwijderen van de geopende les wordt het woord geopend. De andere lessen en de inhoud van Multimodaal en Leesboek blijven behouden.
 
 De lesgegevens staan in `mpop_items.lesson_plan` als JSON. Letterlessen gebruiken hun eigen lesformulier; de bestaande woordeditor, audio en braillepagina's blijven voor woorditems beschikbaar.
 
