@@ -130,6 +130,8 @@ button.busy::after {
 .remote-file-dot[data-state="missing"] { background:#ff6b6b; }
 .remote-file-dot[data-state="unknown"] { background:#7b8798; }
 .list { display:flex; flex-direction:column; gap:8px; }
+.word-group, .word-group-content { display:flex; flex-direction:column; gap:8px; }
+.word-group-content[hidden] { display:none; }
 .itembtn { display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; }
 .itembtn[data-woord-groep="1"] { background:var(--wg1-bg); border-color:var(--wg1-border); }
 .itembtn[data-woord-groep="1"]:hover { background:rgba(88, 214, 141, .26); }

@@ -1522,6 +1522,17 @@
       }
     }
 
+    const WORD_GROUP_EXPANSION_KEY = "mpop.expandedWordGroups";
+    const expandedWordGroups = new Set();
+    try {
+      const stored = JSON.parse(localStorage.getItem(WORD_GROUP_EXPANSION_KEY) || "[]");
+      if (Array.isArray(stored)) {
+        for (const id of stored) {
+          if (typeof id === "string") expandedWordGroups.add(id);
+        }
+      }
+    } catch {}
+
     function renderItems(items) {
       const host = $("itemsList");
       host.innerHTML = "";
@@ -1581,9 +1592,35 @@
         return button;
       };
       for (const it of items.filter((item) => item.item_type !== "letter")) {
+        const groupId = String(it.id);
+        const group = document.createElement("div");
+        group.className = "word-group";
+        const content = document.createElement("div");
+        content.className = "word-group-content";
+        content.id = `word-group-${groupId}`;
+        content.hidden = !expandedWordGroups.has(groupId);
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "lesson-tool word-group-toggle";
+        toggle.setAttribute("aria-controls", content.id);
+        const updateToggle = () => {
+          toggle.textContent = content.hidden ? "\u25b8" : "\u25be";
+          toggle.setAttribute("aria-expanded", String(!content.hidden));
+          toggle.setAttribute("aria-label", `Woordgroep ${it.title || it.code || groupId} ${content.hidden ? "uitklappen" : "inklappen"}`);
+        };
+        updateToggle();
+        toggle.onclick = () => {
+          content.hidden = !content.hidden;
+          if (content.hidden) expandedWordGroups.delete(groupId);
+          else expandedWordGroups.add(groupId);
+          updateToggle();
+          try {
+            localStorage.setItem(WORD_GROUP_EXPANSION_KEY, JSON.stringify([...expandedWordGroups]));
+          } catch {}
+        };
         const row = document.createElement("div");
         row.className = "item-row";
-        row.append(makeItemButton(it));
+        row.append(toggle, makeItemButton(it));
         if (canManageLessons) {
           row.append(makeTool("+", `Letterles toevoegen aan ${it.title}`, () => {
             lessonParent = it;
@@ -1594,7 +1631,8 @@
             $("lessonLetters").focus();
           }));
         }
-        host.append(row);
+        group.append(row, content);
+        host.append(group);
         const lessons = (children.get(String(it.id)) || []).sort((a, b) => a.lesson_order - b.lesson_order);
         for (const [index, lesson] of lessons.entries()) {
           const lessonRow = document.createElement("div");
@@ -1607,7 +1645,7 @@
               makeTool("×", `Letterles ${lesson.letter} verwijderen`, () => deleteLetterLesson(lesson, it))
             );
           }
-          host.append(lessonRow);
+          content.append(lessonRow);
         }
         for (const [view, label] of [["media", "Multimodaal"], ["leesboek", "Leesboek"]]) {
           const sectionRow = document.createElement("div");
@@ -1622,7 +1660,7 @@
           sectionButton.setAttribute("aria-current", String(it.id) === String(currentItem?.id) && currentItemView === view ? "true" : "false");
           sectionButton.onclick = () => selectItem(it.id, view);
           sectionRow.append(sectionButton);
-          host.append(sectionRow);
+          content.append(sectionRow);
         }
       }
     }
