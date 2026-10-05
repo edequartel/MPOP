@@ -9,6 +9,36 @@ let hasMore = false;
 let busy = false;
 let authorized = false;
 
+/* Lucide v0.468.0, ISC License.
+ * Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022
+ * as part of Feather (MIT). All other copyright (c) for Lucide are held
+ * by Lucide Contributors 2022.
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+const actionIcons = {
+  save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+};
+
+function actionButton(icon, label, email) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.title = label;
+  button.setAttribute("aria-label", `${label}: ${email}`);
+  button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${actionIcons[icon]}</svg>`;
+  return button;
+}
+
 function message(text, ok = true) {
   $("adminMessage").textContent = text;
   $("adminMessage").style.color = ok ? "var(--fg)" : "#ffb4b4";
@@ -68,9 +98,7 @@ function renderUsers(users) {
     select.dataset.locked = String(self);
     roleCell.append(select);
     const actions = document.createElement("td");
-    const save = document.createElement("button");
-    save.type = "button";
-    save.textContent = "Rol opslaan";
+    const save = actionButton("save", "Rol opslaan", user.email);
     save.dataset.locked = String(self);
     save.onclick = () => run(async () => {
       if (select.value === "admin" && !window.confirm(`${user.email} adminrechten geven?`)) return;
@@ -78,18 +106,14 @@ function renderUsers(users) {
       await loadUsers();
       message(`Rol opgeslagen voor ${user.email}. De gebruiker moet opnieuw inloggen om de nieuwe knoppen te zien.`);
     });
-    const reset = document.createElement("button");
-    reset.type = "button";
-    reset.textContent = "Herstelmail versturen";
+    const reset = actionButton("mail", "Herstelmail versturen", user.email);
     reset.onclick = () => run(async () => {
       if (!window.confirm(`Een wachtwoordherstelmail versturen naar ${user.email}?`)) return;
       message("Herstelmail versturen...");
       const result = await request({ action: "reset_password", userId: user.id });
       message(result.message);
     });
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.textContent = "Verwijderen";
+    const remove = actionButton("trash", "Gebruiker definitief verwijderen", user.email);
     remove.className = "delete-user";
     remove.setAttribute("aria-label", `Gebruiker ${user.email} verwijderen`);
     remove.dataset.locked = String(self);
@@ -103,7 +127,7 @@ function renderUsers(users) {
       if (!$("userRows").children.length && page > 1) await loadUsers(page - 1);
     });
     const buttons = document.createElement("div");
-    buttons.className = "btnrow";
+    buttons.className = "btnrow user-actions";
     buttons.append(save, reset, remove);
     actions.append(buttons);
     row.append(identity, status, roleCell, actions);

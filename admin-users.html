@@ -13,6 +13,13 @@
     th,td { padding:10px; text-align:left; border-bottom:1px solid var(--line); }
     td select { min-width:140px; }
     td button { width:auto; }
+    .user-actions { flex-wrap:nowrap; width:max-content; gap:6px; }
+    .user-actions button {
+      display:inline-flex; align-items:center; justify-content:center;
+      flex:0 0 36px; width:36px; height:36px; padding:7px; border-radius:6px;
+    }
+    .user-actions svg { width:20px; height:20px; flex:none; }
+    .user-actions button:focus-visible { outline:2px solid #7cc4ff; outline-offset:2px; }
     td .delete-user { color:#ffb4b4; border-color:#b95757; }
     .role-guide { line-height:1.6; }
     .admin-home {
@@ -90,7 +97,7 @@
   const timeout = setTimeout(() => {
     message.textContent = "Laden duurt te lang. Controleer je internetverbinding en ververs de pagina.";
   }, 20000);
-  import("./admin-users.js?v=20261005-delete-user").catch(() => {
+  import("./admin-users.js?v=20261005-action-icons").catch(() => {
     message.textContent = "Gebruikersbeheer kon niet worden geladen. Controleer of alle websitebestanden zijn bijgewerkt.";
   }).finally(() => clearTimeout(timeout));
 </script>
