@@ -18,7 +18,7 @@ Voer ook `migrations/202610050002_letter_lesson_defaults.sql` uit in de Supabase
 
 De letterles met de naam **default** onder de eerste woordgroep in de lijst (bijvoorbeeld **woord**) is het sjabloon. Vul daar de gewenste standaardwaarden in en sla ze op. Nieuwe letterlessen krijgen een eigen kopie van Blok, Week, Les, Doel en alle instructie- en materiaalvelden. De gekozen letter blijft de letter die je met **+** invoert. Latere wijzigingen in het sjabloon wijzigen geen bestaande lessen. Zonder dit sjabloon wordt een lege les aangemaakt.
 
-De letterknoppen tonen bijvoorbeeld **b[1],w[2],l[3] b**. Voor niet ingevulde nummers verschijnt **-**.
+De letterknoppen tonen de letter links en bijvoorbeeld **b:1 w:2 l:3** rechts. Voor niet ingevulde nummers verschijnt **-**.
 
 De lesgegevens staan in `mpop_items.lesson_plan` als JSON. Letterlessen gebruiken hun eigen lesformulier; de bestaande woordeditor, audio en braillepagina's blijven voor woorditems beschikbaar.
 

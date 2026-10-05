@@ -1535,13 +1535,26 @@
         b.dataset.itemView = "word";
         b.setAttribute("aria-current", String(it.id) === String(currentItem?.id) && currentItemView === "word" ? "true" : "false");
         const lessonNumber = (key) => asText(it.lesson_plan?.[key]).trim() || "-";
-        const title = it.item_type === "letter"
-          ? `b[${lessonNumber("block")}],w[${lessonNumber("week")}],l[${lessonNumber("lesson")}] ${it.letter}`
-          : (it.title || "(no title)");
         const status = it.status || "no status";
         const label = document.createElement("span");
         label.className = "item-label";
-        label.textContent = title;
+        if (it.item_type === "letter") {
+          label.classList.add("letter-item-label");
+          const letter = document.createElement("span");
+          letter.className = "lesson-letter";
+          letter.textContent = it.letter;
+          const numbers = document.createElement("span");
+          numbers.className = "lesson-numbers";
+          for (const [prefix, key] of [["b", "block"], ["w", "week"], ["l", "lesson"]]) {
+            const number = document.createElement("span");
+            number.textContent = `${prefix}:${lessonNumber(key)}`;
+            numbers.append(number);
+          }
+          label.append(letter, numbers);
+          b.setAttribute("aria-label", `${it.letter}, blok ${lessonNumber("block")}, week ${lessonNumber("week")}, les ${lessonNumber("lesson")}`);
+        } else {
+          label.textContent = it.title || "(no title)";
+        }
         const dot = document.createElement("span");
         dot.className = "status-dot";
         dot.dataset.status = status || "";

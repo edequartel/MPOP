@@ -139,6 +139,10 @@ button.busy::after {
 .item-row { display:flex; align-items:center; gap:6px; min-width:0; }
 .item-row .itembtn { flex:1; min-width:0; }
 .item-row .item-label { min-width:0; overflow-wrap:anywhere; }
+.letter-item-label { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.lesson-letter { flex:1 1 0; min-width:0; text-align:left; }
+.lesson-numbers { display:flex; flex:0 1 auto; flex-wrap:wrap; justify-content:flex-end; gap:2px 6px; max-width:75%; text-align:right; font-size:11px; color:var(--muted); }
+.lesson-numbers span { max-width:100%; overflow-wrap:anywhere; }
 .itembtn[aria-current="true"] { outline:2px solid #7cc4ff; outline-offset:1px; }
 .lesson-tool { width:36px; height:40px; flex:0 0 36px; padding:0; font-size:20px; border-radius:8px; }
 .letter-lesson-row { margin-left:18px; padding-left:8px; border-left:2px solid var(--line); }
