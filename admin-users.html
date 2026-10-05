@@ -66,6 +66,14 @@
     </section>
   </div>
 </main>
-<script type="module" src="admin-users.js"></script>
+<script type="module">
+  const message = document.getElementById("adminMessage");
+  const timeout = setTimeout(() => {
+    message.textContent = "Laden duurt te lang. Controleer je internetverbinding en ververs de pagina.";
+  }, 20000);
+  import("./admin-users.js?v=20261005-config-fix").catch(() => {
+    message.textContent = "Gebruikersbeheer kon niet worden geladen. Controleer of alle websitebestanden zijn bijgewerkt.";
+  }).finally(() => clearTimeout(timeout));
+</script>
 </body>
 </html>

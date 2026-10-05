@@ -37,8 +37,9 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    template met `token_hash` en `type=invite` of `type=recovery` wordt ook ondersteund.
 5. Publiceer `index.html`, `admin-users.html`, `admin-users.js`,
    `reset-password.html`, `auth-password.js`, `password-link.js` en `manual.pdf`.
-   De bestaande publieke `supabase-config.js` moet beschikbaar zijn voor de
-   nieuwe pagina's; daarin staan alleen de project-URL en publieke anon key.
+   Publiceer ook `supabase-client.js`. Dit bestand bevat dezelfde publieke
+   configuratiefallback als de editor. Het optionele `supabase-config.js` kan
+   daardoor ontbreken; een eventuele lokale projectconfiguratie heeft voorrang.
 
 ## Gebruik door de admin
 

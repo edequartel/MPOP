@@ -1,9 +1,8 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { supabaseConfig } from './supabase-config.js';
+import { loadSupabaseClient } from './supabase-client.js';
 import { readPasswordLink, validatePassword } from './password-link.js';
 
 const $ = (id) => document.getElementById(id);
-const sb = createClient(supabaseConfig.url, supabaseConfig.anonKey, { auth: { detectSessionInUrl: false } });
+let sb = null;
 let ready = false;
 let saving = false;
 function message(text, ok = true) {
@@ -34,6 +33,7 @@ $('resetForm').onsubmit = async (event) => {
   } finally { saving = false; }
 };
 try {
+  sb = await loadSupabaseClient({ auth: { detectSessionInUrl: false } });
   const link = readPasswordLink(window.location);
   window.history.replaceState({}, document.title, new URL('./reset-password.html', window.location.href).href);
   const invitation = link.type === 'invite';

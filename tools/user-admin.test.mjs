@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createUserAdminHandler } from '../supabase/functions/user-admin/handler.js';
 import { readPasswordLink, validatePassword } from '../password-link.js';
+import { loadSupabaseClient } from '../supabase-client.js';
+import fs from 'node:fs';
 
 const adminId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const targetId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
@@ -114,4 +116,30 @@ test('passwords require minimum length and matching confirmation', () => {
   assert.throws(() => validatePassword('short','short'));
   assert.throws(() => validatePassword('long-enough','different'));
   assert.doesNotThrow(() => validatePassword('long-enough','long-enough'));
+});
+
+test('admin and password pages can initialize without optional local config', async () => {
+  let captured;
+  const client = await loadSupabaseClient({}, async (url) => {
+    if (url === './supabase-config.js') throw new Error('404');
+    return { createClient: (...args) => { captured = args; return { ready: true }; } };
+  });
+  assert.equal(client.ready, true);
+  const editor = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const block = editor.match(/const LOCAL_SUPABASE_CONFIG = Object.freeze\(\{([\s\S]*?)\}\)/)[1];
+  assert.equal(captured[0], block.match(/url: "([^"]+)"/)[1]);
+  assert.equal(captured[1], block.match(/anonKey: "([^"]+)"/)[1]);
+});
+
+test('local project config and password flow options take precedence', async () => {
+  let captured;
+  const options = { auth: { detectSessionInUrl: false } };
+  await loadSupabaseClient(options, async (url) => url === './supabase-config.js'
+    ? { supabaseConfig: { url: 'https://custom.supabase.co', anonKey: 'custom-public-key' } }
+    : { createClient: (...args) => { captured = args; return {}; } });
+  assert.deepEqual(captured, ['https://custom.supabase.co', 'custom-public-key', options]);
+});
+
+test('SDK loading errors propagate to the visible startup error handler', async () => {
+  await assert.rejects(loadSupabaseClient({}, async () => { throw new Error('CDN unavailable'); }), /CDN unavailable/);
 });

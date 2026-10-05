@@ -1,7 +1,6 @@
-import { supabaseConfig } from "./supabase-config.js";
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { loadSupabaseClient } from "./supabase-client.js";
 
-const sb = createClient(supabaseConfig.url, supabaseConfig.anonKey);
+let sb = null;
 const $ = (id) => document.getElementById(id);
 const roles = { viewer: "Viewer", editor: "Editor", soundcreator: "Soundcreator", admin: "Admin" };
 let currentAdminId = "";
@@ -28,6 +27,9 @@ async function request(body) {
   if (sessionError || !sessionData.session) throw new Error("Je sessie is verlopen. Log opnieuw in als admin.");
   const { data, error } = await sb.functions.invoke("user-admin", { body });
   if (error) {
+    if (error.context?.status === 404) {
+      throw new Error("De Supabase-beheerfunctie user-admin is nog niet geïnstalleerd. Installeer deze functie en de gebruikersbeheer-migratie voordat je gebruikers kunt beheren.");
+    }
     const detail = await error.context?.json?.().catch(() => null);
     throw new Error(detail?.error || "Gebruikersbeheer is niet bereikbaar. Controleer of de Supabase-functie user-admin is geïnstalleerd.");
   }
@@ -117,15 +119,15 @@ $("inviteForm").onsubmit = (event) => {
 $("btnReloadUsers").onclick = () => run(() => loadUsers());
 $("btnPreviousUsers").onclick = () => run(() => loadUsers(page - 1));
 $("btnNextUsers").onclick = () => run(() => loadUsers(page + 1));
-sb.auth.onAuthStateChange((event) => {
+try {
+  sb = await loadSupabaseClient();
+  sb.auth.onAuthStateChange((event) => {
   if (event === "SIGNED_OUT") {
     authorized = false;
     $("adminContent").hidden = true;
     message("Je bent uitgelogd. Log in de editor opnieuw in als admin.", false);
   }
-});
-
-try {
+  });
   const { data, error } = await sb.auth.getUser();
   if (error || !data.user) throw new Error("Log eerst in de editor in als admin.");
   const { data: profile, error: profileError } = await sb.from("profiles").select("role").eq("user_id", data.user.id).single();
