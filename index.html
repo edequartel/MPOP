@@ -1551,7 +1551,7 @@
           numbers.className = "lesson-numbers";
           for (const [prefix, key] of [["b", "block"], ["w", "week"], ["l", "lesson"]]) {
             const number = document.createElement("span");
-            number.textContent = `${prefix}:${lessonNumber(key)}`;
+            number.textContent = `${prefix}${lessonNumber(key)}`;
             numbers.append(number);
           }
           label.append(letter, numbers);

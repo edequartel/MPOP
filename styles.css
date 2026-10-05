@@ -145,7 +145,7 @@ button.busy::after {
 .lesson-numbers span { max-width:100%; overflow-wrap:anywhere; }
 .itembtn[aria-current="true"] { outline:2px solid #7cc4ff; outline-offset:1px; }
 .lesson-tool { width:36px; height:40px; flex:0 0 36px; padding:0; font-size:20px; border-radius:8px; }
-.letter-lesson-row { margin-left:18px; padding-left:8px; border-left:2px solid var(--line); }
+.letter-lesson-row { margin-left:18px; padding-left:8px; }
 .media-row .itembtn { color:#7cc4ff; }
 #letterLessonDialog { width:min(360px, calc(100vw - 48px)); box-sizing:border-box; background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:16px; }
 #letterLessonDialog::backdrop { background:rgba(0,0,0,.65); }
