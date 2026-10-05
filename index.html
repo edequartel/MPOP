@@ -7,6 +7,18 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>MPOP++ editor - Bartiméus Onderwijs</title>
+  <script id="passwordLinkRedirect">
+    // Forward recovery links before Supabase consumes their session tokens.
+    const authHash = new URLSearchParams(window.location.hash.slice(1));
+    const authQuery = new URLSearchParams(window.location.search);
+    const authLinkType = authHash.get("type") || authQuery.get("type");
+    if (authLinkType === "recovery" || authLinkType === "invite") {
+      const passwordUrl = new URL("./reset-password.html", window.location.href);
+      passwordUrl.search = window.location.search;
+      passwordUrl.hash = window.location.hash;
+      window.location.replace(passwordUrl.href);
+    }
+  </script>
 
   <link id="appStyles" rel="stylesheet" href="styles.css" />
 </head>

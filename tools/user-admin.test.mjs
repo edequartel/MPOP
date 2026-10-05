@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUserAdminHandler } from '../supabase/functions/user-admin/handler.js';
+import { createUserAdminHandler, passwordRedirectUrl } from '../supabase/functions/user-admin/handler.js';
+import vm from 'node:vm';
 import { readPasswordLink, validatePassword } from '../password-link.js';
 import { loadSupabaseClient } from '../supabase-client.js';
 import fs from 'node:fs';
@@ -111,6 +112,27 @@ test('password links support invitations, recovery, OTP and PKCE', () => {
   assert.throws(() => readPasswordLink({hash:'',search:''}));
   assert.throws(() => readPasswordLink({hash:'#type=signup&access_token=access&refresh_token=refresh',search:''}));
   assert.throws(() => readPasswordLink({hash:'#error_description=Expired',search:''}), /Expired/);
+});
+test('old admin redirect configuration cannot send password mail to Vercel or the editor', () => {
+  for (const url of [undefined, 'invalid', 'https://mpop-ssoc.vercel.app/', 'https://tastenbraille.com/mpop/index.html']) {
+    assert.equal(passwordRedirectUrl(url), 'https://tastenbraille.com/mpop/reset-password.html');
+  }
+  assert.equal(passwordRedirectUrl('https://www.tastenbraille.com/mpop/index.html'), 'https://www.tastenbraille.com/mpop/reset-password.html');
+});
+test('editor forwards recovery and invitation tokens unchanged, but not normal login', () => {
+  const editor = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const script = editor.match(/<script id="passwordLinkRedirect">([\s\S]*?)<\/script>/)[1];
+  for (const suffix of ['#type=recovery&access_token=a&refresh_token=r', '?type=recovery&token_hash=h', '#type=invite&access_token=a&refresh_token=r', '#type=signup', '']) {
+    const url = new URL(`https://tastenbraille.com/mpop/index.html${suffix}`);
+    let redirected;
+    vm.runInNewContext(script, { URL, URLSearchParams, window: { location: {
+      href: url.href, hash: url.hash, search: url.search, replace: (value) => { redirected = value; },
+    } } });
+    if (/type=(recovery|invite)/.test(suffix)) {
+      assert.equal(redirected, `https://tastenbraille.com/mpop/reset-password.html${suffix}`);
+      assert.doesNotThrow(() => readPasswordLink(new URL(redirected)));
+    } else assert.equal(redirected, undefined);
+  }
 });
 test('passwords require minimum length and matching confirmation', () => {
   assert.throws(() => validatePassword('short','short'));

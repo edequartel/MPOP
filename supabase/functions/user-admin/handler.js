@@ -1,6 +1,16 @@
 const roles = new Set(["viewer", "editor", "soundcreator", "admin"]);
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export function passwordRedirectUrl(configured) {
+  const fallback = "https://tastenbraille.com/mpop/reset-password.html";
+  try {
+    const url = new URL(configured || fallback);
+    if (url.protocol !== "https:" || !["tastenbraille.com", "www.tastenbraille.com"].includes(url.hostname)
+      || url.port || url.username || url.password) return fallback;
+    return `${url.origin}/mpop/reset-password.html`;
+  } catch { return fallback; }
+}
+
 export function createUserAdminHandler({ createClient, env }) {
   return async (req) => {
     const headers = {
@@ -34,7 +44,7 @@ export function createUserAdminHandler({ createClient, env }) {
       try { body = JSON.parse(text); } catch { return json(400, { error: "Ongeldig verzoek." }); }
       if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, { error: "Ongeldig verzoek." });
       const admin = createClient(url, serviceKey, authOptions);
-      const redirectTo = env("MPOP_AUTH_REDIRECT_URL") || "https://tastenbraille.com/mpop/reset-password.html";
+      const redirectTo = passwordRedirectUrl(env("MPOP_AUTH_REDIRECT_URL"));
 
       if (body.action === "list") {
         const page = body.page ?? 1;

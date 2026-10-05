@@ -28,8 +28,9 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    - De overeenkomstige `https://www.tastenbraille.com/mpop/`-URL's als je die host gebruikt.
 
    De mailfunctie stuurt standaard naar de reset-password-pagina op de host zonder
-   `www`. Voor een andere installatie kun je de serversecret
-   `MPOP_AUTH_REDIRECT_URL` instellen. De browser kan die URL niet wijzigen.
+   `www`. De serversecret `MPOP_AUTH_REDIRECT_URL` kan de host met `www` kiezen.
+   Het pad blijft altijd `/mpop/reset-password.html`; oude Vercel-adressen en
+   verwijzingen naar index.html worden niet meer gebruikt.
 4. Configureer SMTP onder **Authentication > Email / SMTP** voor uitnodigingen
    en herstelmails naar echte gebruikers. Supabase's standaard maildienst heeft
    beperkte ontvangers en verzendlimieten. Houd de Invite user- en Reset
@@ -63,6 +64,24 @@ is verstuurd maar de roltoekenning mislukt, blijft het profiel bij normale
 installatie viewer: sla de gewenste rol opnieuw op in de lijst.
 
 ## Controle
+
+### Herstelmail opent de editor of Vercel
+
+1. Zet **Authentication > URL Configuration > Site URL** op
+   `https://tastenbraille.com/mpop/index.html`, niet op het oude Vercel-adres.
+2. Voeg beide exacte herstel-URL's toe aan **Redirect URLs**:
+   `https://tastenbraille.com/mpop/reset-password.html` en
+   `https://www.tastenbraille.com/mpop/reset-password.html`.
+   Zonder een toegestane redirect kan Supabase terugvallen op de Site URL.
+3. Gebruik in **Email Templates > Reset password** een link met
+   `href="{{ .ConfirmationURL }}"`, geen vast Vercel-adres of `{{ .SiteURL }}`.
+4. Deploy de bijgewerkte `user-admin`-functie opnieuw en publiceer `index.html`
+   en de wachtwoordpagina met de bijbehorende scripts.
+5. Verstuur een nieuwe herstelmail. Bestaande mails behouden hun oude link.
+
+De editor stuurt links met `type=recovery` of `type=invite` door naar het
+wachtwoordscherm en behoudt de verificatiegegevens. Dit gebeurt voordat de
+Supabase-client de link verwerkt. Het wijzigt geen oude Vercel-deployment.
 
 ```sh
 node --test tools/user-admin.test.mjs
