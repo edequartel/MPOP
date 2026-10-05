@@ -50,6 +50,7 @@ a { color:#216e91; }
 <tr><td>5. Leesboek en braillepagina's</td><td>6</td></tr>
 <tr><td>6. Je materiaal als PDF bewaren</td><td>7</td></tr>
 <tr><td>7. Problemen oplossen en afronden</td><td>8</td></tr>
+<tr><td>8. Voor admins: accounts, rollen en herstelmails</td><td>9</td></tr>
 </table>
 <p class="small">Uitgave 5 oktober 2026. Gebaseerd op de huidige MPOP-editor. Welke knoppen je ziet, hangt af van je accountrechten.</p>
 </section>
@@ -64,13 +65,15 @@ a { color:#216e91; }
 <li>Wacht totdat je e-mailadres, je rol en de woordenlijst verschijnen.</li>
 </ol>
 <div class="box"><strong>Zo weet je dat het gelukt is</strong><p>Je ziet <strong>Ververs lijst</strong> en <strong>Log uit</strong>. Onder <strong>2 Kies item</strong> verschijnt de lijst met woorden.</p></div>
-<h3>Nog geen account?</h3>
+<h3>Uitgenodigd door de admin?</h3>
+<p>Je e-mailadres is je inlognaam. Open de uitnodigingsmail van Supabase, klik op de link en vul twee keer je eigen wachtwoord in (minimaal 8 tekens). Klik op <strong>Wachtwoord opslaan</strong> en log daarna in de editor in. De admin kent je rol toe; je krijgt geen wachtwoord per mail.</p>
+<h3>Zelf een account aanmaken</h3>
 <ol>
 <li>Vul je e-mailadres en een wachtwoord in.</li>
 <li>Klik op <strong>Registreren</strong>.</li>
 <li>Open de bevestigingsmail. Kijk ook in je spammap.</li>
 <li>Bevestig je e-mailadres via de link en log daarna in.</li>
-<li>Vraag de beheerder om de rechten die je nodig hebt.</li>
+<li>Je start als viewer. Vraag de admin zo nodig om editorrechten.</li>
 </ol>
 <table>
 <tr><th>Rol</th><th>Wat kun je doen?</th></tr>
@@ -223,6 +226,34 @@ a { color:#216e91; }
 <h3>Klaar voor vandaag?</h3>
 <ol><li>Controleer de laatste opslagmelding en je PDF's.</li><li>Klik op <strong>Log uit</strong>, vooral op een gedeelde computer.</li></ol>
 <p class="small">MPOP en Links openen extra materiaal. Git pull is een beheerfunctie; gebruik die alleen als je het beheer van de website verzorgt.</p>
+</section>
+<section class="page">
+<p class="eyebrow">Stap 8 | Alleen voor admins</p>
+<h2>Accounts en rollen beheren</h2>
+<p>Log in als admin. Klik bij de login-kaart op <strong>Gebruikers beheren</strong>. Er opent een apart venster.</p>
+<h3>Een nieuwe gebruiker uitnodigen</h3>
+<ol>
+<li>Vul de naam en het <strong>e-mailadres</strong> in. Het e-mailadres wordt de inlognaam.</li>
+<li>Kies een <strong>Rol</strong>: Viewer om te bekijken, Editor om inhoud te bewerken, Soundcreator voor audiofuncties of Admin voor beheer.</li>
+<li>Klik op <strong>Uitnodiging versturen</strong> en controleer de melding.</li>
+<li>Vraag de gebruiker de Supabase-mail te openen, ook in de spammap.</li>
+<li>De gebruiker klikt op de uitnodigingslink, stelt zelf een wachtwoord in en logt daarna in de editor in.</li>
+</ol>
+<div class="box"><strong>Geen wachtwoorden versturen</strong><p>De admin ziet geen wachtwoorden. De uitnodiging bevat een link waarmee de gebruiker zelf een wachtwoord kiest.</p></div>
+<h3>Een bestaande gebruiker een andere rol geven</h3>
+<ol>
+<li>Zoek de gebruiker in de lijst. Gebruik zo nodig <strong>Volgende</strong>.</li>
+<li>Kies de gewenste rol en klik op <strong>Rol opslaan</strong>.</li>
+<li>Vraag de gebruiker opnieuw in te loggen om de nieuwe knoppen te zien.</li>
+</ol>
+<h3>Een herstelmail sturen bij een vergeten wachtwoord</h3>
+<ol>
+<li>Zoek de juiste gebruiker en controleer het e-mailadres.</li>
+<li>Klik op <strong>Herstelmail versturen</strong> en bevestig.</li>
+<li>De gebruiker opent de nieuwste mail en vult twee keer een nieuw wachtwoord in.</li>
+<li>Na <strong>Wachtwoord opslaan</strong> logt de gebruiker opnieuw in met het e-mailadres en het nieuwe wachtwoord.</li>
+</ol>
+<p class="small">Werkt de mail niet? Laat de beheerder de Supabase-mailinstellingen controleren. Je kunt je eigen adminrol niet verwijderen; de laatste admin moet behouden blijven.</p>
 </section>
 </body>
 </html>
