@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gebruikers beheren - MPOP</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    main { max-width:1000px; margin:24px auto; }
+    .card { margin-bottom:16px; }
+    .admin-table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { padding:10px; text-align:left; border-bottom:1px solid var(--line); }
+    td select { min-width:140px; }
+    td button { width:auto; }
+    .role-guide { line-height:1.6; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Gebruikers beheren</h1>
+  <p><a href="index.html">Terug naar de editor</a></p>
+  <p id="adminMessage" role="status" aria-live="polite">Adminrechten controleren...</p>
+  <div id="adminContent" hidden>
+    <section class="card">
+      <h2 class="section-title">Nieuwe gebruiker uitnodigen</h2>
+      <p class="muted">Het e-mailadres is de inlognaam. Supabase verstuurt een uitnodiging waarmee de gebruiker zelf een wachtwoord instelt. Je hoeft geen wachtwoord te versturen.</p>
+      <form id="inviteForm">
+        <label for="inviteName">Naam</label>
+        <input id="inviteName" maxlength="100" autocomplete="name">
+        <label for="inviteEmail">E-mailadres (inlognaam)</label>
+        <input id="inviteEmail" type="email" required autocomplete="email" maxlength="254">
+        <label for="inviteRole">Rol</label>
+        <select id="inviteRole">
+          <option value="viewer">Viewer - bekijken en luisteren</option>
+          <option value="editor">Editor - inhoud en letterlessen bewerken</option>
+          <option value="soundcreator">Soundcreator - audiofuncties</option>
+          <option value="admin">Admin - inhoud en gebruikers beheren</option>
+        </select>
+        <div class="btnrow mt-10"><button id="btnInvite" type="submit">Uitnodiging versturen</button></div>
+      </form>
+    </section>
+    <section class="card">
+      <h2 class="section-title">Bestaande gebruikers</h2>
+      <p class="muted">Kies een rol en klik op Rol opslaan. Met Herstelmail versturen stuur je een link om een nieuw wachtwoord in te stellen. Controleer eerst of je de juiste gebruiker kiest.</p>
+      <div class="btnrow"><button id="btnReloadUsers" type="button">Ververs gebruikers</button></div>
+      <div class="admin-table-wrap">
+        <table>
+          <thead><tr><th scope="col">Gebruiker</th><th scope="col">Account</th><th scope="col">Rol</th><th scope="col">Acties</th></tr></thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
+      <div class="btnrow mt-10">
+        <button id="btnPreviousUsers" type="button">Vorige</button>
+        <span id="userPage" class="muted"></span>
+        <button id="btnNextUsers" type="button">Volgende</button>
+      </div>
+    </section>
+    <section class="card role-guide">
+      <h2 class="section-title">Welke rol kies je?</h2>
+      <p><strong>Viewer:</strong> bekijkt materiaal en luistert naar bestaande audio.</p>
+      <p><strong>Editor:</strong> bewerkt woorden, letterlessen en leesboekmateriaal.</p>
+      <p><strong>Soundcreator:</strong> gebruikt de beschikbare audiofuncties; gewone inhoud is alleen-lezen.</p>
+      <p><strong>Admin:</strong> heeft beheerrechten, maakt audio en beheert gebruikers. Ken deze rol alleen toe aan beheerders.</p>
+      <p class="muted">Je kunt je eigen adminrol hier niet verwijderen. Wachtwoorden zijn nooit zichtbaar voor de admin.</p>
+    </section>
+  </div>
+</main>
+<script type="module" src="admin-users.js"></script>
+</body>
+</html>

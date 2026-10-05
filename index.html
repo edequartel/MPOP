@@ -82,6 +82,7 @@
         <div class="btnrow mt-10">
           <button id="btnRefresh">Ververs lijst</button>
           <button id="btnSignOut">Log uit</button>
+          <button id="btnUserAdmin" type="button" data-admin-only style="display:none">Gebruikers beheren</button>
         </div>
       </div>
       </div>
@@ -1360,7 +1361,7 @@
         const displayName = error ? "" : (prof?.display_name || "");
         $("userRole").textContent = role;
         $("userDisplayName").textContent = displayName ? displayName : "";
-        isViewerRole = role === "viewer" || role === "soundcreator";
+        isViewerRole = role !== "admin" && role !== "editor";
         isAdminRole = role === "admin";
         isSoundCreatorRole = role === "soundcreator";
         canManageLessons = role === "admin" || role === "editor";
@@ -1406,7 +1407,9 @@
         msg($("authMsg"), "");
         const email = val("email").trim();
         const password = val("password");
-        const { error } = await sb.auth.signUp({ email, password });
+        const { error } = await sb.auth.signUp({ email, password, options: {
+          emailRedirectTo: new URL("./index.html", window.location.href).href
+        } });
         if (error) throw error;
         msg($("authMsg"), "Registratie gelukt. Bevestig je e-mail voordat je kunt inloggen.");
       } catch (e) {
@@ -4281,6 +4284,9 @@ function scheduleAutosave() {
     // -----------------------------
     $("btnSignIn").onclick = signIn;
     $("btnSignUp").onclick = signUp;
+    $("btnUserAdmin").onclick = () => {
+      if (isAdminRole) window.open("./admin-users.html", "_blank", "noreferrer");
+    };
     $("btnForgotPassword").onclick = requestPasswordReset;
     wirePasswordToggle("password", "btnTogglePassword");
 
