@@ -43,6 +43,8 @@ Onder **Multimodaal** staat **Leesboek**. Hier vind je **Braille algemeen**, de 
 
 De PDF-knop **Lessen woordgroep**, tussen **Multimodaal** en **Braille**, bundelt alle letterlessen van het geselecteerde woord in de ingestelde volgorde. Elke les begint op een nieuwe pagina met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Lange teksten lopen door op vervolgpagina's.
 
+Bovenaan een geopende letterles staat **PDF letterles**. Deze knop maakt dezelfde PDF-opmaak voor alleen die les. Niet-opgeslagen wijzigingen worden eerst opgeslagen.
+
 ## Velden invullen
 
 - Vul de tekstvelden in per pagina.

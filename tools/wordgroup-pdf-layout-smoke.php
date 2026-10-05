@@ -30,6 +30,7 @@ if (!is_dir($directory)) mkdir($directory, 0775, true);
 $normal = render_wordgroup_pdf(["title" => "aap"], $lessons);
 if (!str_starts_with($normal, "%PDF-")) throw new RuntimeException("No PDF generated.");
 file_put_contents($directory . "/wordgroup-layout-smoke.pdf", $normal);
+file_put_contents($directory . "/wordgroup-single-letter-smoke.pdf", render_wordgroup_pdf(["title" => "aap"], [$lessons[1]]));
 
 $overflow = $plan;
 $overflow["goal"] = str_repeat("Een uitgebreid doel met meerdere regels, zodat ook dit veld veilig op vervolgpagina's wordt weergegeven. ", 70);

@@ -171,6 +171,9 @@
 
       <div id="letterLessonEditor" class="hidden">
         <h2 id="lessonTitle" class="section-title"></h2>
+        <div class="btnrow mt-10">
+          <button type="button" id="btnLetterLessonPdf" disabled>PDF letterles</button>
+        </div>
         <div class="lesson-meta">
           <div><label for="lessonLetter">Letter</label><input id="lessonLetter" maxlength="20" /></div>
           <div><label for="lessonBlock">Blok</label><input id="lessonBlock" type="number" min="1" step="1" /></div>
@@ -548,6 +551,7 @@
     let sb = null;
     let currentItem = null; // full row from mpop_items
     let currentItemView = "word";
+    let letterLessonPdfRunning = false;
     let currentPagesByNo = new Map(); // page_no -> page row from mpop_pages
     let sounds = [];
     let authRefreshRunning = false;
@@ -1874,6 +1878,7 @@ function scheduleAutosave() {
     }
 
     function updatePdfButton() {
+      $("btnLetterLessonPdf").disabled = letterLessonPdfRunning || currentItem?.item_type !== "letter" || (!canManageLessons && !isSoundCreatorRole);
       $("btnWordgroupPdf").disabled = !currentItem?.id || currentItem.item_type === "letter";
       $("btnPdf").disabled = !currentItem?.id;
       $("btnManualPdf").disabled = !currentItem?.id;
@@ -4285,6 +4290,46 @@ function scheduleAutosave() {
         msg($("saveMsg"), e.message || String(e), false);
       } finally {
         setButtonBusy($("btnPdf"), false);
+        updatePdfButton();
+      }
+    };
+    $("btnLetterLessonPdf").onclick = async () => {
+      if (letterLessonPdfRunning || currentItem?.item_type !== "letter") return;
+      const button = $("btnLetterLessonPdf");
+      const lessonId = currentItem.id;
+      const feedback = $("lessonSaveMsg");
+      letterLessonPdfRunning = true;
+      try {
+        setButtonBusy(button, true, "PDF maken...");
+        await flushPendingItemChanges();
+        const lesson = itemsById.get(String(lessonId));
+        if (!lesson) throw new Error("Deze letterles bestaat niet meer. Ververs de lijst.");
+        msg(feedback, "Letterles PDF wordt gemaakt...");
+        const token = await getFreshSupabaseAccessToken();
+        const options = { headers: { Authorization: `Bearer ${token}` } };
+        const qs = `?lesson_id=${encodeURIComponent(lessonId)}`;
+        let response = await fetch(`${WORDGROUP_PDF_URL_LOCAL}${qs}`, options);
+        if (response.status === 404) response = await fetch(`${WORDGROUP_PDF_URL_REMOTE}${qs}`, options);
+        if (!response.ok) {
+          const error = await response.json().catch(() => null);
+          throw new Error(error?.error || `Letterles PDF maken mislukt (${response.status}).`);
+        }
+        const url = URL.createObjectURL(await response.blob());
+        const parentTitle = itemsById.get(String(lesson.parent_item_id))?.title || "woordgroep";
+        const slug = (value) => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `mpop-letterles-${slug(parentTitle) || "woordgroep"}-${slug(lesson.letter) || lessonId}.pdf`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        msg(feedback, "Letterles PDF gereed.");
+      } catch (error) {
+        msg(feedback, error.message || String(error), false);
+      } finally {
+        letterLessonPdfRunning = false;
+        setButtonBusy(button, false);
         updatePdfButton();
       }
     };
