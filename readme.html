@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="refresh" content="0;url=manual.pdf" />
   <title>Handleiding</title>
   <style>
     :root { --bg:#0b0e14; --fg:#e9effa; --muted:#a9b6c8; --card:#121826; --line:rgba(255,255,255,.12); }
@@ -22,24 +23,8 @@
     <a class="home" href="index.html">Home</a>
   </div>
   <div class="card">
-    <div id="mdContent">Loading…</div>
+    <h1>Handleiding MPOP</h1>
+    <p><a href="manual.pdf">Open de stap-voor-stap-handleiding (PDF)</a></p>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script>
-    const mdHost = document.getElementById("mdContent");
-    fetch("README.md")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to load README.md (${res.status})`);
-        }
-        return res.text();
-      })
-      .then((md) => {
-        mdHost.innerHTML = marked.parse(md || "");
-      })
-      .catch((err) => {
-        mdHost.textContent = err.message || String(err);
-      });
-  </script>
 </body>
 </html>
