@@ -9,7 +9,7 @@ import fs from 'node:fs';
 const adminId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const targetId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const target = { id: targetId, email: 'user@example.org', email_confirmed_at: '2026-10-05' };
-function fixture({ role = 'admin', authenticated = true, rpcError = null, inviteError = null } = {}) {
+function fixture({ role = 'admin', authenticated = true, rpcError = null, inviteError = null, deleteError = null, missingTarget = false } = {}) {
   const calls = [];
   const caller = {
     auth: { getUser: async () => ({ data: { user: authenticated ? { id: adminId } : null }, error: null }) },
@@ -18,7 +18,8 @@ function fixture({ role = 'admin', authenticated = true, rpcError = null, invite
   const admin = {
     auth: { admin: {
       listUsers: async (options) => { calls.push(['list', options]); return { data: { users: [target] } }; },
-      getUserById: async (id) => { calls.push(['get', id]); return { data: { user: { ...target, id } } }; },
+      getUserById: async (id) => { calls.push(['get', id]); return { data: { user: missingTarget ? null : { ...target, id } } }; },
+      deleteUser: async (id) => { calls.push(['delete', id]); return { error: deleteError }; },
       inviteUserByEmail: async (...args) => {
         calls.push(['invite', ...args]); return { data: { user: target }, error: inviteError };
       },
@@ -46,7 +47,7 @@ test('unauthenticated requests cannot list or send mail', async () => {
 });
 test('non-admin roles cannot use any action', async () => {
   for (const role of ['viewer', 'editor', 'soundcreator', 'unknown']) {
-    for (const action of ['list', 'invite', 'set_role', 'reset_password']) {
+    for (const action of ['list', 'invite', 'set_role', 'reset_password', 'delete_user']) {
       const f = fixture({ role });
       assert.equal((await f.send({ action, role: 'admin', userId: targetId })).status, 403);
       assert.deepEqual(f.calls, []);
@@ -62,7 +63,7 @@ test('list returns only the permitted account fields and profile roles', async (
 test('invalid inputs have no administrative side effects', async () => {
   for (const body of [null, [], {action:'invalid'}, {action:'list',page:0},
     {action:'invite',email:'bad',role:'admin'}, {action:'invite',email:target.email,role:'root'},
-    {action:'set_role',userId:'invalid',role:'editor'}]) {
+    {action:'set_role',userId:'invalid',role:'editor'}, {action:'delete_user',userId:'invalid'}]) {
     const f = fixture();
     assert.equal((await f.send(body)).status, 400);
     assert.deepEqual(f.calls, []);
@@ -102,6 +103,45 @@ test('reset sends mail to account email, ignoring client email and redirect', as
   const f = fixture();
   assert.equal((await f.send({action:'reset_password',userId:targetId,email:'wrong@example.org',redirectTo:'https://attacker.example'})).status, 200);
   assert.deepEqual(f.calls[1], ['mail', target.email, {redirectTo:'https://tastenbraille.com/mpop/reset-password.html'}]);
+});
+test('deletion requires authentication and cannot delete the calling admin', async () => {
+  for (const authenticated of [true, false]) {
+    const f = fixture({ authenticated });
+    assert.equal((await f.send({ action: 'delete_user', userId: targetId }, false)).status, 401);
+    assert.deepEqual(f.calls, []);
+  }
+  const f = fixture();
+  assert.equal((await f.send({ action: 'delete_user', userId: adminId })).status, 409);
+  assert.deepEqual(f.calls, []);
+});
+test('deletion uses the server guard then deletes only the specified account', async () => {
+  const f = fixture();
+  const response = await f.send({ action: 'delete_user', userId: targetId, email: 'wrong@example.org' });
+  assert.equal(response.status, 200);
+  assert.match((await response.json()).message, /user@example.org verwijderd/);
+  assert.deepEqual(f.calls, [
+    ['get', targetId],
+    ['rpc', 'mpop_admin_check_user_delete', { target_user_id: targetId }],
+    ['delete', targetId],
+  ]);
+});
+test('missing accounts and guard failures do not delete anything', async () => {
+  const missing = fixture({ missingTarget: true });
+  assert.equal((await missing.send({ action: 'delete_user', userId: targetId })).status, 404);
+  assert.deepEqual(missing.calls, [['get', targetId]]);
+  for (const message of ['last admin', 'migration missing']) {
+    const f = fixture({ rpcError: { message } });
+    assert.equal((await f.send({ action: 'delete_user', userId: targetId })).status, 409);
+    assert.ok(!f.calls.some(([name]) => name === 'delete'));
+  }
+});
+test('failed account deletion does not report success', async () => {
+  const f = fixture({ deleteError: { message: 'database constraint' } });
+  const response = await f.send({ action: 'delete_user', userId: targetId });
+  assert.equal(response.status, 409);
+  const body = await response.json();
+  assert.equal(body.ok, undefined);
+  assert.match(body.error, /niet verwijderd/);
 });
 test('password links support invitations, recovery, OTP and PKCE', () => {
   for (const type of ['invite', 'recovery']) {

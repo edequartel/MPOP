@@ -79,10 +79,20 @@ export function createUserAdminHandler({ createClient, env }) {
         return json(200, { ok: true, message: `Uitnodiging verstuurd naar ${email}. De gebruiker stelt via de mail zelf een wachtwoord in.` });
       }
 
-      if (body.action !== "set_role" && body.action !== "reset_password") return json(400, { error: "Onbekende actie." });
+      if (!["set_role", "reset_password", "delete_user"].includes(body.action)) return json(400, { error: "Onbekende actie." });
       if (typeof body.userId !== "string" || !uuid.test(body.userId)) return json(400, { error: "Ongeldige gebruiker." });
+      if (body.action === "delete_user" && body.userId === auth.user.id) {
+        return json(409, { error: "Je kunt je eigen account niet verwijderen." });
+      }
       const { data: target, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !target.user?.email) return json(404, { error: "Gebruiker niet gevonden." });
+      if (body.action === "delete_user") {
+        const guard = await admin.rpc("mpop_admin_check_user_delete", { target_user_id: body.userId });
+        if (guard.error) return json(409, { error: "Gebruiker niet verwijderd. De laatste admin moet blijven; controleer ook of de gebruikersverwijdering-migratie is geïnstalleerd." });
+        const { error } = await admin.auth.admin.deleteUser(body.userId);
+        if (error) return json(409, { error: "Gebruiker niet verwijderd. De laatste admin moet blijven. Gekoppelde gegevens of bestanden kunnen verwijderen ook blokkeren." });
+        return json(200, { ok: true, message: `Gebruiker ${target.user.email} verwijderd.` });
+      }
       if (body.action === "set_role") {
         if (!roles.has(body.role)) return json(400, { error: "Ongeldige rol." });
         if (body.userId === auth.user.id && body.role !== "admin") return json(409, { error: "Je kunt je eigen adminrechten niet verwijderen." });

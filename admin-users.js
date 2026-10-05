@@ -87,9 +87,24 @@ function renderUsers(users) {
       const result = await request({ action: "reset_password", userId: user.id });
       message(result.message);
     });
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Verwijderen";
+    remove.className = "delete-user";
+    remove.setAttribute("aria-label", `Gebruiker ${user.email} verwijderen`);
+    remove.dataset.locked = String(self);
+    remove.title = self ? "Je kunt je eigen account niet verwijderen." : "Gebruiker definitief verwijderen";
+    remove.onclick = () => run(async () => {
+      if (!window.confirm(`${user.email} definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+      message("Gebruiker verwijderen...");
+      const result = await request({ action: "delete_user", userId: user.id });
+      message(result.message);
+      await loadUsers();
+      if (!$("userRows").children.length && page > 1) await loadUsers(page - 1);
+    });
     const buttons = document.createElement("div");
     buttons.className = "btnrow";
-    buttons.append(save, reset);
+    buttons.append(save, reset, remove);
     actions.append(buttons);
     row.append(identity, status, roleCell, actions);
     $("userRows").append(row);

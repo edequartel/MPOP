@@ -12,6 +12,10 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    en constraints als je schema aanvullende verplichte velden heeft.
 2. Deploy de functie:
 
+   Voer eerst ook `migrations/202610050005_delete_users.sql` uit om gebruikers
+   te kunnen verwijderen. Deze migratie beschermt de laatste admin, ook bij
+   gelijktijdige verwijderingen en rolwijzigingen.
+
    ```sh
    supabase login
    supabase functions deploy user-admin --project-ref zrcdyzcfsdlmqqwdhctk
@@ -52,6 +56,10 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    opnieuw inloggen om de gewijzigde knoppen te zien.
 5. Wachtwoord vergeten: klik naast de juiste gebruiker **Herstelmail versturen**.
    De ontvanger opent de nieuwste link en stelt een nieuw wachtwoord in.
+6. Account verwijderen: klik **Verwijderen** naast de juiste gebruiker en
+   bevestig de definitieve verwijdering. Je kunt je eigen account niet verwijderen.
+   Gekoppelde gegevens of bestanden kunnen de verwijdering blokkeren; de functie
+   verwijdert die niet apart om de blokkade te omzeilen.
 
 De admin ziet geen wachtwoorden en verstuurt geen wachtwoorden in de mail.
 Zelfregistratie blijft beschikbaar; nieuwe gebruikers starten als viewer.
