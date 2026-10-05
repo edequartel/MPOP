@@ -40,7 +40,7 @@ function wordgroup_pdf_lines(string $text, FontMetrics $metrics, string $font, f
 function render_wordgroup_pdf(array $word, array $lessons): string {
   $sections = [
     "herhaling" => "Herhaling", "nieuwe_letter" => "Nieuwe letter",
-    "schrijfmotoriek" => "Schrijfmotoriek", "tactiele_discriminatie" => "Tactiele discriminatie",
+    "schrijfmotoriek" => "Schrijf-\nmotoriek", "tactiele_discriminatie" => "Tactiele discriminatie",
     "auditieve_discriminatie" => "Auditieve discriminatie", "auditieve_synthese" => "Auditieve synthese",
     "letter_en_woorden_lezen" => "Letter en woorden lezen", "auditieve_analyse" => "Auditieve analyse",
     "dictee" => "Dictee", "letters" => "Letters", "woord" => "Woord", "zin" => "Zin",
@@ -50,6 +50,7 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
   usort($lessons, static fn(array $a, array $b): int => ($a["lesson_order"] ?? 0) <=> ($b["lesson_order"] ?? 0));
   $options = new Options();
   $options->set("defaultFont", "DejaVu Sans");
+  $options->setFontCache(sys_get_temp_dir());
   $dompdf = new Dompdf($options);
   $dompdf->setPaper("A4", "portrait");
   $dompdf->loadHtml('<html><body></body></html>');
@@ -65,7 +66,7 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
   $left = 51.0;
   $width = $canvas->get_width() - 2 * $left;
   $bottom = $canvas->get_height() - 65;
-  $columnWidths = [$width * .15, $width * .65, $width * .20];
+  $columnWidths = [$width * .18, $width * .62, $width * .20];
   $columnX = [$left, $left + $columnWidths[0], $left + $columnWidths[0] + $columnWidths[1]];
   $size = 10.0;
   $lineHeight = 14.0;
@@ -113,16 +114,16 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
     foreach ($sections as $key => $label) {
       $section = is_array($plan["sections"][$key] ?? null) ? $plan["sections"][$key] : [];
       $columns = [
-        wordgroup_pdf_lines($label, $metrics, $bold, $columnWidths[0] - 10, $size),
+        wordgroup_pdf_lines($label, $metrics, $bold, $columnWidths[0] - 10, 9.5),
         wordgroup_pdf_lines(wordgroup_pdf_text($section["instruction"] ?? ""), $metrics, $regular, $columnWidths[1] - 10, $size),
         wordgroup_pdf_lines(wordgroup_pdf_text($section["material"] ?? ""), $metrics, $regular, $columnWidths[2] - 10, $size)
       ];
       $offset = 0;
       $totalLines = max(array_map("count", $columns));
       while ($offset < $totalLines) {
-        $labelLines = $offset === 0 ? $columns[0] : wordgroup_pdf_lines($label . " (vervolg)", $metrics, $bold, $columnWidths[0] - 10, $size);
+        $labelLines = $offset === 0 ? $columns[0] : wordgroup_pdf_lines($label . " (vervolg)", $metrics, $bold, $columnWidths[0] - 10, 9.5);
         $capacity = (int)floor(($bottom - $y - 12) / $lineHeight);
-        if ($capacity < max(count($labelLines), 2)) {
+        if ($capacity < max(count($labelLines), 2) || ($offset === 0 && $totalLines <= 30 && $totalLines > $capacity)) {
           $newPage(true);
           $tableHeader();
           $capacity = (int)floor(($bottom - $y - 12) / $lineHeight);
@@ -132,7 +133,7 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
         $height = max(array_map("count", $rowColumns)) * $lineHeight + 12;
         foreach ($rowColumns as $column => $lines) {
           foreach ($lines as $lineIndex => $line) {
-            $canvas->text($columnX[$column] + 5, $y + 6 + $lineIndex * $lineHeight, $line, $column === 0 ? $bold : $regular, $size, $ink);
+            $canvas->text($columnX[$column] + 5, $y + 6 + $lineIndex * $lineHeight, $line, $column === 0 ? $bold : $regular, $column === 0 ? 9.5 : $size, $ink);
           }
         }
         for ($i = 1; $i < 3; $i++) $canvas->line($columnX[$i], $y, $columnX[$i], $y + $height, $rule, .4);
