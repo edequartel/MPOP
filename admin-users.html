@@ -97,7 +97,7 @@
   const timeout = setTimeout(() => {
     message.textContent = "Laden duurt te lang. Controleer je internetverbinding en ververs de pagina.";
   }, 20000);
-  import("./admin-users.js?v=20261005-action-icons").catch(() => {
+  import("./admin-users.js?v=20261005-delete-feedback").catch(() => {
     message.textContent = "Gebruikersbeheer kon niet worden geladen. Controleer of alle websitebestanden zijn bijgewerkt.";
   }).finally(() => clearTimeout(timeout));
 </script>

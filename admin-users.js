@@ -42,6 +42,7 @@ function actionButton(icon, label, email) {
 function message(text, ok = true) {
   $("adminMessage").textContent = text;
   $("adminMessage").style.color = ok ? "var(--fg)" : "#ffb4b4";
+  if (!ok) $("adminMessage").scrollIntoView({ block: "center", behavior: "smooth" });
 }
 
 function updateButtons() {

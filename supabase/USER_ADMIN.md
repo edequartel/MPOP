@@ -15,6 +15,9 @@ is de inlognaam. Gebruikers kiezen zelf hun wachtwoord via een Supabase-mail.
    Voer eerst ook `migrations/202610050005_delete_users.sql` uit om gebruikers
    te kunnen verwijderen. Deze migratie beschermt de laatste admin, ook bij
    gelijktijdige verwijderingen en rolwijzigingen.
+   Voer daarna `migrations/202610050006_allow_auth_profile_cleanup.sql` uit.
+   Deze laat de Auth-server het profiel opruimen bij accountverwijdering,
+   terwijl rechtstreekse profielverwijderingen door gebruikers geblokkeerd blijven.
 
    ```sh
    supabase login
