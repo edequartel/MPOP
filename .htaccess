@@ -1,3 +1,9 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Keep old extensionless API URLs working on Apache/PHP.
+  RewriteRule ^api/(pdf|manualpdf|pdfbraille|supabase-config)$ api/$1.php [L]
+</IfModule>
+
 <IfModule mod_headers.c>
   <FilesMatch "\.(html|php)$">
     Header always set Cache-Control "no-cache, no-store, must-revalidate"

@@ -14,12 +14,30 @@
     td select { min-width:140px; }
     td button { width:auto; }
     .role-guide { line-height:1.6; }
+    .admin-home {
+      display:inline-flex; align-items:center; gap:8px; padding:9px 16px;
+      border:1px solid #206bc4; border-radius:6px; background:#206bc4;
+      color:#fff; font-size:14px; font-weight:600; line-height:20px;
+      text-decoration:none; box-shadow:0 1px 2px rgba(0,0,0,.15);
+      transition:background-color 120ms ease, border-color 120ms ease;
+    }
+    .admin-home:hover { background:#1a569d; border-color:#1a569d; }
+    .admin-home:focus-visible { outline:3px solid #7cc4ff; outline-offset:3px; }
+    .admin-home svg { width:20px; height:20px; flex:none; }
   </style>
 </head>
 <body>
 <main>
   <h1>Gebruikers beheren</h1>
-  <p><a href="index.html">Terug naar de editor</a></p>
+  <p>
+    <a class="admin-home" href="index.html" aria-label="Home: terug naar de editor">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12H3l9-9 9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+        <path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6" />
+      </svg>
+      Home
+    </a>
+  </p>
   <p id="adminMessage" role="status" aria-live="polite">Adminrechten controleren...</p>
   <div id="adminContent" hidden>
     <section class="card">

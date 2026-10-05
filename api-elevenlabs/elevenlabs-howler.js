@@ -56,7 +56,6 @@
   let mergedAudio = null;
   let mergedAudioVersion = "";
   let sb = null;
-  let sbConfig = null;
   let savedVoiceIdPref = "";
   let preparedMergedSources = [];
   const voiceLinkById = new Map();
@@ -95,49 +94,8 @@
   }
 
   async function initSupabaseClient() {
-    const CONFIG_URL_LOCAL = "../supabase-config.js";
-    const OWN_SERVER_BASE_URL = "https://www.tastenbraille.com/mpop";
-    const LOCAL_SUPABASE_CONFIG = Object.freeze({
-      url: "https://zrcdyzcfsdlmqqwdhctk.supabase.co",
-      anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyY2R5emNmc2RsbXFxd2RoY3RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxOTgyNzUsImV4cCI6MjA4Mzc3NDI3NX0.voT1eh_FbBkrv7ZMN7B8VRRbrab7tyx3eV6JuXy4ySs"
-    });
-    const CONFIG_URLS_REMOTE = [
-      `${OWN_SERVER_BASE_URL}/supabase-config.js`,
-      "https://www.tastenbraille.com/braillestudio/api/supabase-config",
-    ];
-    let cfg = LOCAL_SUPABASE_CONFIG;
-    try {
-      const mod = await import(CONFIG_URL_LOCAL);
-      cfg = mod?.supabaseConfig || mod?.default || LOCAL_SUPABASE_CONFIG;
-    } catch {
-      cfg = LOCAL_SUPABASE_CONFIG;
-    }
-    if (!cfg?.url || !cfg?.anonKey) {
-      let lastError = null;
-      for (const url of CONFIG_URLS_REMOTE) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) {
-            const body = await res.text().catch(() => "");
-            throw new Error(`Failed to load supabase-config from ${url} (${res.status}). ${body}`.trim());
-          }
-          const json = await res.json();
-          if (json?.url && json?.anonKey) {
-            cfg = json;
-            break;
-          }
-          throw new Error(`Supabase config missing url/anonKey from ${url}.`);
-        } catch (e) {
-          lastError = e;
-        }
-      }
-      if (!cfg?.url || !cfg?.anonKey) {
-        throw lastError || new Error("Supabase config missing url/anonKey.");
-      }
-    }
-    sbConfig = cfg;
-    const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm");
-    return createClient(cfg.url, cfg.anonKey);
+    const { loadSupabaseClient } = await import("../supabase-client.js");
+    return loadSupabaseClient();
   }
 
   function setAuthUiVisible(loggedIn, session = null) {
