@@ -1536,7 +1536,7 @@
         b.setAttribute("aria-current", String(it.id) === String(currentItem?.id) && currentItemView === "word" ? "true" : "false");
         const lessonNumber = (key) => asText(it.lesson_plan?.[key]).trim() || "-";
         const title = it.item_type === "letter"
-          ? `b[${lessonNumber("block")}],w[${lessonNumber("week")}],l[${lessonNumber("lesson")}] ${it.letter}`
+          ? `b${lessonNumber("block")},w${lessonNumber("week")},l${lessonNumber("lesson")} ${it.letter}`
           : (it.title || "(no title)");
         const status = it.status || "no status";
         const label = document.createElement("span");
@@ -1586,7 +1586,8 @@
           if (canManageLessons) {
             lessonRow.append(
               makeTool("↑", `Letter ${lesson.letter} omhoog`, () => moveLetterLesson(lesson, -1), index === 0),
-              makeTool("↓", `Letter ${lesson.letter} omlaag`, () => moveLetterLesson(lesson, 1), index === lessons.length - 1)
+              makeTool("↓", `Letter ${lesson.letter} omlaag`, () => moveLetterLesson(lesson, 1), index === lessons.length - 1),
+              makeTool("×", `Letterles ${lesson.letter} verwijderen`, () => deleteLetterLesson(lesson, it))
             );
           }
           host.append(lessonRow);
@@ -1665,6 +1666,36 @@
       } finally {
         lessonMutationRunning = false;
         await loadItems();
+      }
+    }
+
+    async function deleteLetterLesson(lesson, parent) {
+      if (!canManageLessons || lessonMutationRunning) return;
+      if (!window.confirm(`Letterles "${lesson.letter}" bij "${parent.title || parent.code}" verwijderen?`)) return;
+      lessonMutationRunning = true;
+      let feedback = "";
+      let succeeded = false;
+      try {
+        await flushPendingItemChanges();
+        const latest = itemsById.get(String(lesson.id));
+        if (!latest) throw new Error("Deze les bestaat niet meer. Ververs de lijst.");
+        const { data, error } = await sb.from("mpop_items").delete()
+          .eq("id", lesson.id).eq("item_type", "letter").eq("version", latest.version).select("id");
+        if (error) throw error;
+        if (!data?.length) throw new Error("De les is gewijzigd of je mag deze niet verwijderen. Ververs de lijst en probeer opnieuw.");
+        if (String(currentItem?.id) === String(lesson.id)) {
+          hideEditor();
+          currentPagesByNo.clear();
+          await selectItem(parent.id);
+        }
+        feedback = "Letterles verwijderd.";
+        succeeded = true;
+      } catch (error) {
+        feedback = error.message || String(error);
+      } finally {
+        lessonMutationRunning = false;
+        await loadItems();
+        msg(currentItem ? currentSaveMessage() : $("listMsg"), feedback, succeeded);
       }
     }
 

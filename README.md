@@ -31,7 +31,9 @@ De items zijn de woorden waar de methode uit bestaat.
 
 Met **+** naast een woord voeg je zelf een letterles toe, bijvoorbeeld `p` of `aa` bij `aap`. De pijlen bepalen de volgorde. Een letterles heeft een eigen formulier met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Wijzigingen worden automatisch opgeslagen.
 
-De letterknoppen tonen de ingevulde nummers en letter, bijvoorbeeld **b[1],w[2],l[3] b**. Na installatie van de defaults-migratie krijgen nieuwe lessen de inhoud van de les **default** onder de eerste woordgroep als startwaarden. Bestaande lessen worden niet overschreven.
+De letterknoppen tonen de ingevulde nummers en letter, bijvoorbeeld **b1,w2,l3 b**. Na installatie van de defaults-migratie krijgen nieuwe lessen de inhoud van de les **default** onder de eerste woordgroep als startwaarden. Bestaande lessen worden niet overschreven.
+
+Admins en editors kunnen een letterles met **×** verwijderen. Dit vraagt eerst om bevestiging. Voer hiervoor de migratie `202610050003_delete_letter_lessons.sql` uit in Supabase.
 
 Voer voor installatie eerst de SQL-migratie uit. Zie [Letterlessen installeren](supabase/LETTER_LESSONS.md).
 
