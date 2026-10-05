@@ -31,6 +31,8 @@ De items zijn de woorden waar de methode uit bestaat.
 
 Met **+** naast een woord voeg je zelf een letterles toe, bijvoorbeeld `p` of `aa` bij `aap`. De pijlen bepalen de volgorde. Een letterles heeft een eigen formulier met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Wijzigingen worden automatisch opgeslagen.
 
+De letterknoppen tonen de ingevulde nummers en letter, bijvoorbeeld **b[1],w[2],l[3] b**. Na installatie van de defaults-migratie krijgen nieuwe lessen de inhoud van de les **default** onder de eerste woordgroep als startwaarden. Bestaande lessen worden niet overschreven.
+
 Voer voor installatie eerst de SQL-migratie uit. Zie [Letterlessen installeren](supabase/LETTER_LESSONS.md).
 
 Onder de letterlessen staat **Multimodaal**. Hier vind je pagina 1, 2 en 3 van het woord, met de bestaande teksten, afbeeldingen en audio. Deze pagina's staan niet meer in de gewone woordweergave. De gegevens blijven bij hetzelfde woord opgeslagen.
