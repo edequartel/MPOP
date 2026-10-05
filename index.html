@@ -92,6 +92,18 @@
         <div id="itemsLoggedIn" class="hidden">
           <div id="listMsg" class="tiny mt-10"></div>
           <div class="list mt-8" id="itemsList"></div>
+          <dialog id="letterLessonDialog" aria-labelledby="letterLessonHeading">
+            <form id="letterLessonForm">
+              <h2 id="letterLessonHeading" class="section-title">Letterles toevoegen</h2>
+              <label for="lessonLetters">Letter of lettercombinatie</label>
+              <input id="lessonLetters" required maxlength="20" autocomplete="off" />
+              <div id="letterLessonMsg" class="tiny mt-10" role="status"></div>
+              <div class="btnrow mt-10">
+                <button type="submit" id="btnCreateLetterLesson">Toevoegen</button>
+                <button type="button" id="btnCancelLetterLesson">Annuleren</button>
+              </div>
+            </form>
+          </dialog>
         </div>
       </div>
 
@@ -156,6 +168,29 @@
     <div class="card">
       <h2 class="section-title">3 Wijzig item</h2>
       <div id="editorHint" class="muted">Log in en kies item om te wijzigen.</div>
+
+      <div id="letterLessonEditor" class="hidden">
+        <h2 id="lessonTitle" class="section-title"></h2>
+        <div class="lesson-meta">
+          <div><label for="lessonLetter">Letter</label><input id="lessonLetter" maxlength="20" /></div>
+          <div><label for="lessonBlock">Blok</label><input id="lessonBlock" type="number" min="1" step="1" /></div>
+          <div><label for="lessonWeek">Week</label><input id="lessonWeek" type="number" min="1" step="1" /></div>
+          <div><label for="lessonNumber">Les</label><input id="lessonNumber" type="number" min="1" step="1" /></div>
+        </div>
+        <label for="lessonGoal">Doel</label>
+        <textarea id="lessonGoal" class="lesson-goal"></textarea>
+        <div class="lesson-table-wrap mt-10">
+          <table class="lesson-table">
+            <thead><tr><th scope="col">Onderdeel</th><th scope="col">Instructie</th><th scope="col">Materiaal</th></tr></thead>
+            <tbody id="lessonRows"></tbody>
+          </table>
+        </div>
+        <div class="btnrow mt-10">
+          <button type="button" id="btnSaveLetterLesson">Opslaan</button>
+          <button type="button" id="btnReloadLetterLesson">Opnieuw laden</button>
+        </div>
+        <div id="lessonSaveMsg" class="tiny mt-10" role="status"></div>
+      </div>
 
       <div id="editor" class="hidden">
         <div class="kpi">
@@ -509,6 +544,35 @@
     let isViewerRole = false;
     let isAdminRole = false;
     let isSoundCreatorRole = false;
+    let canManageLessons = false;
+    let lessonParent = null;
+    let lessonMutationRunning = false;
+    let itemsById = new Map();
+    const LESSON_SECTIONS = [
+      ["herhaling", "Herhaling"], ["nieuwe_letter", "Nieuwe letter"],
+      ["schrijfmotoriek", "Schrijfmotoriek"], ["tactiele_discriminatie", "Tactiele discriminatie"],
+      ["auditieve_discriminatie", "Auditieve discriminatie"], ["auditieve_synthese", "Auditieve synthese"],
+      ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["auditieve_analyse", "Auditieve analyse"],
+      ["dictee", "Dictee"], ["letters", "Letters"], ["woord", "Woord"], ["zin", "Zin"],
+      ["tekst_lezen_leesboek", "Tekst lezen leesboek"], ["tempolezen", "Tempolezen"],
+      ["verwerking_werkboek", "Verwerking werkboek"]
+    ];
+    for (const [key, label] of LESSON_SECTIONS) {
+      const row = document.createElement("tr");
+      const heading = document.createElement("th");
+      heading.scope = "row";
+      heading.textContent = label;
+      row.append(heading);
+      for (const field of ["instruction", "material"]) {
+        const cell = document.createElement("td");
+        const input = document.createElement("textarea");
+        input.id = `lesson_${key}_${field}`;
+        input.setAttribute("aria-label", `${label}: ${field === "instruction" ? "Instructie" : "Materiaal"}`);
+        cell.append(input);
+        row.append(cell);
+      }
+      $("lessonRows").append(row);
+    }
     let storyAudioExistsCheckSeq = 0;
     let object1AudioExistsCheckSeq = 0;
     let object2AudioExistsCheckSeq = 0;
@@ -1284,6 +1348,7 @@
         isViewerRole = role === "viewer" || role === "soundcreator";
         isAdminRole = role === "admin";
         isSoundCreatorRole = role === "soundcreator";
+        canManageLessons = role === "admin" || role === "editor";
         setEditorReadonly(isViewerRole);
         updateAdminOnlyAudioButtons();
 
@@ -1296,6 +1361,8 @@
         isViewerRole = false;
         isAdminRole = false;
         isSoundCreatorRole = false;
+        canManageLessons = false;
+        $("letterLessonDialog").close();
         updateAdminOnlyAudioButtons();
       }
       } finally {
@@ -1423,28 +1490,38 @@
         msg($("listMsg"), "Loading...");
         const { data, error } = await sb
           .from("mpop_items")
-          .select("id, code, title, status, updated_at, version, sort_index, woord_groep")
+          .select("id, code, title, status, updated_at, version, sort_index, woord_groep, parent_item_id, item_type, letter, lesson_order")
           .order("sort_index", { ascending: true });
 
         if (error) throw error;
 
+        itemsById = new Map((data || []).map((item) => [String(item.id), item]));
         renderItems(data || []);
         msg($("listMsg"), `Loaded ${data?.length || 0} items.`);
       } catch (e) {
-        msg($("listMsg"), e.message || String(e), false);
+        const missingMigration = ["42703", "PGRST204"].includes(e.code);
+        msg($("listMsg"), missingMigration
+          ? "Voer eerst de Supabase-migratie voor letterlessen uit."
+          : (e.message || String(e)), false);
       }
     }
 
     function renderItems(items) {
-      const filtered = items;
-
       const host = $("itemsList");
       host.innerHTML = "";
-
-      for (const it of filtered) {
+      const children = new Map();
+      for (const it of items.filter((item) => item.item_type === "letter")) {
+        const key = String(it.parent_item_id);
+        if (!children.has(key)) children.set(key, []);
+        children.get(key).push(it);
+      }
+      const makeItemButton = (it) => {
         const b = document.createElement("button");
+        b.type = "button";
         b.className = "itembtn";
-        const title = it.title || "(no title)";
+        b.dataset.itemId = String(it.id);
+        b.setAttribute("aria-current", String(it.id) === String(currentItem?.id) ? "true" : "false");
+        const title = it.item_type === "letter" ? `Letter ${it.letter}` : (it.title || "(no title)");
         const status = it.status || "no status";
         const label = document.createElement("span");
         label.className = "item-label";
@@ -1457,12 +1534,112 @@
         }
         b.append(label, dot);
         b.onclick = () => selectItem(it.id);
-        host.appendChild(b);
+        return b;
+      };
+      const makeTool = (symbol, label, onClick, disabled = false) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "lesson-tool";
+        button.textContent = symbol;
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.disabled = disabled || lessonMutationRunning;
+        button.onclick = onClick;
+        return button;
+      };
+      for (const it of items.filter((item) => item.item_type !== "letter")) {
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.append(makeItemButton(it));
+        if (canManageLessons) {
+          row.append(makeTool("+", `Letterles toevoegen aan ${it.title}`, () => {
+            lessonParent = it;
+            $("letterLessonHeading").textContent = `Letterles bij ${it.title}`;
+            $("letterLessonForm").reset();
+            msg($("letterLessonMsg"), "");
+            $("letterLessonDialog").showModal();
+            $("lessonLetters").focus();
+          }));
+        }
+        host.append(row);
+        const lessons = (children.get(String(it.id)) || []).sort((a, b) => a.lesson_order - b.lesson_order);
+        for (const [index, lesson] of lessons.entries()) {
+          const lessonRow = document.createElement("div");
+          lessonRow.className = "item-row letter-lesson-row";
+          lessonRow.append(makeItemButton(lesson));
+          if (canManageLessons) {
+            lessonRow.append(
+              makeTool("↑", `Letter ${lesson.letter} omhoog`, () => moveLetterLesson(lesson, -1), index === 0),
+              makeTool("↓", `Letter ${lesson.letter} omlaag`, () => moveLetterLesson(lesson, 1), index === lessons.length - 1)
+            );
+          }
+          host.append(lessonRow);
+        }
+      }
+    }
+
+    async function flushPendingItemChanges() {
+      const pending = !!autosaveTimer || autosaveRunning;
+      if (autosaveTimer) clearTimeout(autosaveTimer);
+      autosaveTimer = null;
+      while (autosaveRunning) await new Promise((resolve) => setTimeout(resolve, 100));
+      if (pending && currentItem && !isViewerRole && !(await saveItem(false))) {
+        throw new Error("Sla de huidige wijzigingen eerst op voordat je een andere les opent.");
+      }
+    }
+
+    $("btnCancelLetterLesson").onclick = () => $("letterLessonDialog").close();
+    $("letterLessonForm").onsubmit = async (event) => {
+      event.preventDefault();
+      if (!canManageLessons || !lessonParent || lessonMutationRunning) return;
+      const letters = val("lessonLetters").trim();
+      if (!/^[\p{L}]+$/u.test(letters)) {
+        msg($("letterLessonMsg"), "Vul alleen letters in, bijvoorbeeld b of aa.", false);
+        return;
+      }
+      lessonMutationRunning = true;
+      $("btnCreateLetterLesson").disabled = true;
+      $("btnCancelLetterLesson").disabled = true;
+      try {
+        await flushPendingItemChanges();
+        const { data, error } = await sb.rpc("mpop_add_letter_lesson", {
+          parent_id: String(lessonParent.id), letters
+        });
+        if (error) throw error;
+        $("letterLessonDialog").close();
+        await loadItems();
+        await selectItem(data.id);
+      } catch (e) {
+        msg($("letterLessonMsg"), e.message || String(e), false);
+      } finally {
+        lessonMutationRunning = false;
+        $("btnCreateLetterLesson").disabled = false;
+        $("btnCancelLetterLesson").disabled = false;
+        await loadItems();
+      }
+    };
+
+    async function moveLetterLesson(lesson, direction) {
+      if (!canManageLessons || lessonMutationRunning) return;
+      lessonMutationRunning = true;
+      try {
+        await flushPendingItemChanges();
+        const { error } = await sb.rpc("mpop_move_letter_lesson", {
+          lesson_id: String(lesson.id), direction
+        });
+        if (error) throw error;
+        if (currentItem?.item_type === "letter") await selectItem(currentItem.id);
+      } catch (e) {
+        msg($("saveMsg"), e.message || String(e), false);
+      } finally {
+        lessonMutationRunning = false;
+        await loadItems();
       }
     }
 
     async function selectItem(id) {
       try {
+        if (currentItem && String(currentItem.id) !== String(id)) await flushPendingItemChanges();
         msg($("saveMsg"), "");
         const { data, error } = await sb
           .from("mpop_items")
@@ -1472,12 +1649,16 @@
         if (error) throw error;
 
         currentItem = data;
-        await loadPagesForItem(id);
+        for (const button of $("itemsList").querySelectorAll("[data-item-id]")) {
+          button.setAttribute("aria-current", button.dataset.itemId === String(id) ? "true" : "false");
+        }
+        if (data.item_type !== "letter") await loadPagesForItem(id);
+        else currentPagesByNo.clear();
         console.log("Pages loaded for item", id, Array.from(currentPagesByNo.values()));
         renderBraillePages();
         showEditor(data);
         updatePdfButton();
-        await loadSounds();
+        if (data.item_type !== "letter") await loadSounds();
       } catch (e) {
         msg($("saveMsg"), e.message || String(e), false);
       }
@@ -1486,6 +1667,7 @@
     function hideEditor() {
       $("editorHint").style.display = "block";
       $("editor").style.display = "none";
+      $("letterLessonEditor").style.display = "none";
       currentItem = null;
       updatePdfButton();
     }
@@ -1500,10 +1682,14 @@ function scheduleAutosave() {
   if (Date.now() < suppressAutosaveUntil) return;
   if (autosaveTimer) clearTimeout(autosaveTimer);
   autosaveTimer = setTimeout(async () => {
-        if (autosaveRunning || !currentItem) return;
+        if (!currentItem) return;
+        if (autosaveRunning) {
+          scheduleAutosave();
+          return;
+        }
         autosaveRunning = true;
         try {
-          msg($("saveMsg"), "Autosaving...");
+          msg(currentSaveMessage(), "Autosaving...");
           await saveItem();
         } finally {
           autosaveRunning = false;
@@ -1513,6 +1699,25 @@ function scheduleAutosave() {
 
     function showEditor(row) {
       $("editorHint").style.display = "none";
+      $("letterLessonEditor").style.display = row.item_type === "letter" ? "block" : "none";
+      if (row.item_type === "letter") {
+        $("editor").style.display = "none";
+        $("lessonTitle").textContent = row.title || `Letter ${row.letter}`;
+        setVal("lessonLetter", row.letter || "");
+        const plan = row.lesson_plan || {};
+        setVal("lessonBlock", plan.block ?? "");
+        setVal("lessonWeek", plan.week ?? "");
+        setVal("lessonNumber", plan.lesson ?? "");
+        setVal("lessonGoal", plan.goal || "");
+        for (const [key] of LESSON_SECTIONS) {
+          for (const field of ["instruction", "material"]) {
+            setVal(`lesson_${key}_${field}`, plan.sections?.[key]?.[field] || "");
+          }
+        }
+        for (const input of $("letterLessonEditor").querySelectorAll("input, textarea")) input.readOnly = !canManageLessons;
+        $("btnSaveLetterLesson").disabled = !canManageLessons;
+        return;
+      }
       $("editor").style.display = "block";
 
       $("code").textContent = row.code || "";
@@ -1611,10 +1816,48 @@ function scheduleAutosave() {
     // -----------------------------
     // Save (optimistic concurrency via version)
     // -----------------------------
+    function currentSaveMessage() {
+      return currentItem?.item_type === "letter" ? $("lessonSaveMsg") : $("saveMsg");
+    }
+
+    async function saveLetterLesson() {
+      if (!canManageLessons) throw new Error("Je mag deze les alleen bekijken.");
+      const letter = val("lessonLetter").trim();
+      if (!/^[\p{L}]{1,20}$/u.test(letter)) throw new Error("Vul alleen letters in, bijvoorbeeld b of aa.");
+      const number = (id) => {
+        if (!val(id)) return null;
+        const value = Number(val(id));
+        if (!Number.isSafeInteger(value) || value < 1) throw new Error("Blok, week en les moeten positieve hele getallen zijn.");
+        return value;
+      };
+      const plan = {
+        block: number("lessonBlock"), week: number("lessonWeek"), lesson: number("lessonNumber"),
+        goal: val("lessonGoal"), sections: {}
+      };
+      for (const [key] of LESSON_SECTIONS) {
+        plan.sections[key] = {
+          instruction: val(`lesson_${key}_instruction`), material: val(`lesson_${key}_material`)
+        };
+      }
+      const { data, error } = await sb.from("mpop_items")
+        .update({ letter, title: `${itemsById.get(String(currentItem.parent_item_id))?.title || "Woord"} - letter ${letter}`, lesson_plan: plan })
+        .eq("id", currentItem.id).eq("version", currentItem.version).select("*").maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Deze les is door iemand anders gewijzigd. Laad de les opnieuw.");
+      currentItem = data;
+      $("lessonTitle").textContent = data.title;
+      await loadItems();
+    }
+
     async function saveItem(showMsg = true) {
       if (!currentItem) return;
       try {
-        if (showMsg) msg($("saveMsg"), "Saving...");
+        if (showMsg) msg(currentSaveMessage(), "Saving...");
+        if (currentItem.item_type === "letter") {
+          await saveLetterLesson();
+          if (showMsg) msg(currentSaveMessage(), "Opgeslagen.");
+          return true;
+        }
         const payload = {
           auteur: val("auteur").trim(),
           code: val("itemCode").trim(),
@@ -1690,8 +1933,10 @@ function scheduleAutosave() {
         showEditor(data);
         if (showMsg) msg($("saveMsg"), "Saved.");
         await loadItems();
+        return true;
       } catch (e) {
-        msg($("saveMsg"), e.message || String(e), false);
+        msg(currentSaveMessage(), e.message || String(e), false);
+        return false;
       }
     }
 
@@ -4073,7 +4318,22 @@ function scheduleAutosave() {
     updateAdminOnlyAudioButtons();
 
 
-    for (const el of document.querySelectorAll("#editor input, #editor textarea, #editor select")) {
+    $("btnSaveLetterLesson").onclick = async () => {
+      if (autosaveTimer) clearTimeout(autosaveTimer);
+      autosaveTimer = null;
+      while (autosaveRunning) await new Promise((resolve) => setTimeout(resolve, 100));
+      autosaveRunning = true;
+      try { await saveItem(); }
+      finally { autosaveRunning = false; }
+    };
+    $("btnReloadLetterLesson").onclick = async () => {
+      if (autosaveTimer) clearTimeout(autosaveTimer);
+      autosaveTimer = null;
+      while (autosaveRunning) await new Promise((resolve) => setTimeout(resolve, 100));
+      if (currentItem) await selectItem(currentItem.id);
+      msg($("lessonSaveMsg"), "Opnieuw geladen.");
+    };
+    for (const el of document.querySelectorAll("#editor input, #editor textarea, #editor select, #letterLessonEditor input, #letterLessonEditor textarea")) {
       el.addEventListener("input", scheduleAutosave);
       el.addEventListener("change", scheduleAutosave);
     }

@@ -27,6 +27,12 @@ Deze handleiding beschrijft hoe je de MPOP++ editor gebruikt om items te bekijke
 
 De items zijn de woorden waar de methode uit bestaat.
 
+## Letterlessen
+
+Met **+** naast een woord voeg je zelf een letterles toe, bijvoorbeeld `p` of `aa` bij `aap`. De pijlen bepalen de volgorde. Een letterles heeft een eigen formulier met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Wijzigingen worden automatisch opgeslagen.
+
+Voer voor installatie eerst de SQL-migratie uit. Zie [Letterlessen installeren](supabase/LETTER_LESSONS.md).
+
 ## Velden invullen
 
 - Vul de tekstvelden in per pagina.
