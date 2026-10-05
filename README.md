@@ -33,6 +33,8 @@ Met **+** naast een woord voeg je zelf een letterles toe, bijvoorbeeld `p` of `a
 
 De letterknoppen tonen de letter links en de ingevulde nummers rechts, bijvoorbeeld **b** links en **b:1 w:2 l:3** rechts. Na installatie van de defaults-migratie krijgen nieuwe lessen de inhoud van de les **default** onder de eerste woordgroep als startwaarden. Bestaande lessen worden niet overschreven.
 
+Admins en editors kunnen een letterles met **×** verwijderen. Dit vraagt eerst om bevestiging. Voer hiervoor de migratie `202610050003_delete_letter_lessons.sql` uit in Supabase.
+
 Voer voor installatie eerst de SQL-migratie uit. Zie [Letterlessen installeren](supabase/LETTER_LESSONS.md).
 
 Onder de letterlessen staat **Multimodaal**. Hier vind je pagina 1, 2 en 3 van het woord, met de bestaande teksten, afbeeldingen en audio. Deze pagina's staan niet meer in de gewone woordweergave. De gegevens blijven bij hetzelfde woord opgeslagen.

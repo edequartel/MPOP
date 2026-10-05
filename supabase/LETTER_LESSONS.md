@@ -20,6 +20,10 @@ De letterles met de naam **default** onder de eerste woordgroep in de lijst (bij
 
 De letterknoppen tonen de letter links en bijvoorbeeld **b:1 w:2 l:3** rechts. Voor niet ingevulde nummers verschijnt **-**.
 
+## Letterlessen verwijderen
+
+Voer `migrations/202610050003_delete_letter_lessons.sql` uit in de Supabase SQL Editor. Admins en editors zien daarna **×** naast de pijlen van elke letterles. Bevestig het verwijderen in het dialoogvenster. Na het verwijderen van de geopende les wordt het woord geopend. De andere lessen en de inhoud van Multimodaal en Leesboek blijven behouden.
+
 De lesgegevens staan in `mpop_items.lesson_plan` als JSON. Letterlessen gebruiken hun eigen lesformulier; de bestaande woordeditor, audio en braillepagina's blijven voor woorditems beschikbaar.
 
 Controleer na installatie: maak bij `aap` eerst `p` en dan `aa`, verplaats `aa` omhoog, vul een instructie en materiaal in en ververs de pagina. Controleer ook met een viewer dat de les zichtbaar is en niet kan worden aangepast.
