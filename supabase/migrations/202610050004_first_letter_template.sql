@@ -1,5 +1,6 @@
--- Run this after the original letter-lessons migration.
--- Only future lessons receive the template; existing lessons remain unchanged.
+-- Run after the letter-lessons migrations.
+-- New letter lessons copy their start content from the first letter lesson
+-- under the first word in the editor. Existing lessons remain unchanged.
 begin;
 
 create or replace function public.mpop_add_letter_lesson(parent_id text, letters text)
@@ -23,8 +24,7 @@ begin
   select coalesce(max(lesson_order), 0) + 1 into next_position
     from public.mpop_items where parent_item_id = parent.id;
 
-  -- The first letter lesson under the first word in the editor is the shared template.
-  select lesson_plan into template_plan
+  select lesson.lesson_plan into template_plan
     from public.mpop_items lesson
     where lesson.item_type = 'letter'
       and lesson.parent_item_id = (

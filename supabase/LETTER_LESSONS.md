@@ -14,9 +14,9 @@ Elke letterles heeft Blok, Week, Les, Doel en alle onderdelen uit het lesformuli
 
 ## Standaardinhoud voor nieuwe lessen
 
-Voer ook `migrations/202610050002_letter_lesson_defaults.sql` uit in de Supabase SQL Editor. De oorspronkelijke migratie hoeft niet opnieuw uitgevoerd te worden.
+Voer ook `migrations/202610050002_letter_lesson_defaults.sql` uit in de Supabase SQL Editor. De oorspronkelijke migratie hoeft niet opnieuw uitgevoerd te worden. Als deze migratie al eerder is uitgevoerd, voer dan aanvullend `migrations/202610050004_first_letter_template.sql` uit.
 
-De letterles met de naam **default** onder de eerste woordgroep in de lijst (bijvoorbeeld **woord**) is het sjabloon. Vul daar de gewenste standaardwaarden in en sla ze op. Nieuwe letterlessen krijgen een eigen kopie van Blok, Week, Les, Doel en alle instructie- en materiaalvelden. De gekozen letter blijft de letter die je met **+** invoert. Latere wijzigingen in het sjabloon wijzigen geen bestaande lessen. Zonder dit sjabloon wordt een lege les aangemaakt.
+De eerste letterles onder de eerste woordgroep in de lijst is het sjabloon. Vul daar de gewenste standaardwaarden in en sla ze op. Nieuwe letterlessen krijgen een eigen kopie van Blok, Week, Les, Doel en alle instructie- en materiaalvelden. De gekozen letter blijft de letter die je met **+** invoert. Latere wijzigingen in het sjabloon wijzigen geen bestaande lessen. Zonder dit sjabloon wordt een lege les aangemaakt.
 
 De letterknoppen tonen de letter links en bijvoorbeeld **b:1 w:2 l:3** rechts. Voor niet ingevulde nummers verschijnt **-**.
 

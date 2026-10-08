@@ -25,6 +25,9 @@ $('resetForm').onsubmit = async (event) => {
     if (error) throw error;
     ready = false;
     $('resetForm').reset();
+    $('resetForm').hidden = true;
+    $('introText').hidden = true;
+    $('passwordHeading').textContent = 'Wachtwoord opgeslagen';
     await sb.auth.signOut({ scope: 'local' });
     message('Je wachtwoord is opgeslagen. Ga terug naar de editor en log in met je e-mailadres en nieuwe wachtwoord.');
   } catch (error) {
