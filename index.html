@@ -575,24 +575,26 @@
     let itemsById = new Map();
     const LESSON_SECTIONS = [
       ["herhaling", "Herhaling"], ["nieuwe_letter", "Nieuwe letter"],
-      ["schrijfmotoriek", "Schrijfmotoriek"], ["tactiele_discriminatie", "Tactiele discriminatie"],
+      ["tactiele_discriminatie", "Tactiele discriminatie"],
       ["auditieve_discriminatie", "Auditieve discriminatie"], ["auditieve_synthese", "Auditieve synthese"],
+      ["schrijfmotoriek", "Schrijfmotoriek"],
       ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["auditieve_analyse", "Auditieve analyse"],
       ["dictee", "Dictee"],
       ["tekst_lezen_leesboek", "Tekst lezen leesboek"], ["tempolezen", "Tempolezen"],
       ["verwerking_werkboek", "Verwerking werkboek"]
     ];
-    for (const [key, label] of LESSON_SECTIONS) {
+    for (const [index, [key, label]] of LESSON_SECTIONS.entries()) {
+      const numberedLabel = `${index + 1}. ${label}`;
       const row = document.createElement("tr");
       const heading = document.createElement("th");
       heading.scope = "row";
-      heading.textContent = label;
+      heading.textContent = numberedLabel;
       row.append(heading);
       for (const field of ["instruction", "material"]) {
         const cell = document.createElement("td");
         const input = document.createElement("textarea");
         input.id = `lesson_${key}_${field}`;
-        input.setAttribute("aria-label", `${label}: ${field === "instruction" ? "Instructie" : "Materiaal"}`);
+        input.setAttribute("aria-label", `${numberedLabel}: ${field === "instruction" ? "Instructie" : "Materiaal"}`);
         cell.append(input);
         row.append(cell);
       }

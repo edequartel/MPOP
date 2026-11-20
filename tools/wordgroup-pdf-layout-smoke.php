@@ -4,8 +4,8 @@ declare(strict_types=1);
 require_once __DIR__ . "/../api/wordgroup_pdf_layout.php";
 
 $sections = [
-  "herhaling", "nieuwe_letter", "schrijfmotoriek", "tactiele_discriminatie",
-  "auditieve_discriminatie", "auditieve_synthese", "letter_en_woorden_lezen",
+  "herhaling", "nieuwe_letter", "tactiele_discriminatie", "auditieve_discriminatie",
+  "auditieve_synthese", "schrijfmotoriek", "letter_en_woorden_lezen",
   "auditieve_analyse", "dictee",
   "tekst_lezen_leesboek", "tempolezen", "verwerking_werkboek"
 ];

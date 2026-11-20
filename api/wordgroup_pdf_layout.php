@@ -40,8 +40,9 @@ function wordgroup_pdf_lines(string $text, FontMetrics $metrics, string $font, f
 function render_wordgroup_pdf(array $word, array $lessons): string {
   $sections = [
     "herhaling" => "Herhaling", "nieuwe_letter" => "Nieuwe letter",
-    "schrijfmotoriek" => "Schrijf-\nmotoriek", "tactiele_discriminatie" => "Tactiele discriminatie",
+    "tactiele_discriminatie" => "Tactiele discriminatie",
     "auditieve_discriminatie" => "Auditieve discriminatie", "auditieve_synthese" => "Auditieve synthese",
+    "schrijfmotoriek" => "Schrijf-\nmotoriek",
     "letter_en_woorden_lezen" => "Letter en woorden lezen", "auditieve_analyse" => "Auditieve analyse",
     "dictee" => "Dictee",
     "tekst_lezen_leesboek" => "Tekst lezen leesboek", "tempolezen" => "Tempolezen",
@@ -111,7 +112,9 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
     }
     $tableHeader();
 
+    $sectionNumber = 0;
     foreach ($sections as $key => $label) {
+      $label = ++$sectionNumber . ". " . $label;
       $section = is_array($plan["sections"][$key] ?? null) ? $plan["sections"][$key] : [];
       $columns = [
         wordgroup_pdf_lines($label, $metrics, $bold, $columnWidths[0] - 10, 9.5),
