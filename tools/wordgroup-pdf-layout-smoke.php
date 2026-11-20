@@ -5,8 +5,8 @@ require_once __DIR__ . "/../api/wordgroup_pdf_layout.php";
 
 $sections = [
   "herhaling", "nieuwe_letter", "tactiele_discriminatie", "auditieve_discriminatie",
-  "auditieve_synthese", "letter_en_woorden_lezen", "schrijfmotoriek",
-  "auditieve_analyse", "dictee",
+  "auditieve_synthese", "letter_en_woorden_lezen", "auditieve_analyse",
+  "schrijfmotoriek", "dictee",
   "tekst_lezen_leesboek", "tempolezen", "verwerking_werkboek"
 ];
 $plan = ["block" => 1, "week" => 2, "lesson" => 3,

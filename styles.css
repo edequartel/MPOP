@@ -173,11 +173,24 @@ button.busy::after {
 .lesson-goal { min-height:140px; }
 .lesson-table-wrap { overflow:auto; }
 .lesson-table { width:100%; border-collapse:collapse; table-layout:fixed; }
-.lesson-table th, .lesson-table td { border:1px solid var(--line); padding:8px; vertical-align:top; overflow-wrap:anywhere; }
-.lesson-table thead th { text-align:left; background:rgba(255,255,255,.06); }
-.lesson-table th:first-child { width:24%; }
-.lesson-table tbody th { text-align:left; font-size:13px; font-weight:500; }
-.lesson-table textarea { min-height:180px; border-radius:4px; resize:vertical; }
+.lesson-table > :is(thead, tbody) > tr > :is(th, td) { border:1px solid var(--line); padding:8px; vertical-align:top; overflow-wrap:anywhere; }
+.lesson-table > thead > tr > th { text-align:left; background:rgba(255,255,255,.06); }
+.lesson-table > thead > tr > th:first-child { width:24%; }
+.lesson-table > tbody > tr > th { text-align:left; font-size:13px; font-weight:500; }
+.lesson-markdown-field { display:grid; grid-template-columns:minmax(0,1fr); }
+.lesson-markdown-field > * { grid-area:1 / 1; min-height:180px; border-radius:4px; }
+.lesson-markdown-field textarea { opacity:0; z-index:1; resize:vertical; }
+.lesson-markdown-field textarea:focus { opacity:1; }
+.lesson-markdown-field textarea:focus + .lesson-markdown-preview { visibility:hidden; }
+.lesson-markdown-field textarea[readonly] { display:none; }
+.lesson-markdown-preview { box-sizing:border-box; border:1px solid var(--line); background:rgba(255,255,255,.04); padding:10px; font-size:14px; overflow-wrap:anywhere; }
+.lesson-markdown-preview > :first-child { margin-top:0; }
+.lesson-markdown-preview > :last-child { margin-bottom:0; }
+.lesson-markdown-preview :is(ul, ol) { padding-inline-start:1.4em; }
+.lesson-markdown-preview blockquote { margin-inline:0; padding-inline-start:.75em; border-inline-start:3px solid var(--line); }
+.lesson-markdown-preview pre { white-space:pre-wrap; }
+.lesson-markdown-preview img { max-width:100%; height:auto; }
+.lesson-markdown-preview a { color:#7cc4ff; }
 @media (max-width:800px) {
   .row { grid-template-columns:minmax(0,1fr); }
 }
@@ -189,8 +202,8 @@ button.busy::after {
 }
 @media (max-width:600px) {
   .lesson-meta { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .lesson-table th, .lesson-table td { padding:4px; }
-  .lesson-table textarea { font-size:13px; padding:6px; min-height:240px; }
+  .lesson-table > :is(thead, tbody) > tr > :is(th, td) { padding:4px; }
+  .lesson-markdown-field > * { font-size:13px; padding:6px; min-height:240px; }
 }
 .title-code-row { display:flex; align-items:flex-end; gap:10px; }
 .title-code-row > div:first-child { flex:1; min-width:0; }

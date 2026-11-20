@@ -20,7 +20,7 @@
     }
   </script>
 
-  <link id="appStyles" rel="stylesheet" href="styles.css?v=word-reorder-2" />
+  <link id="appStyles" rel="stylesheet" href="styles.css?v=lesson-markdown" />
 </head>
 
 <body>
@@ -496,6 +496,7 @@
   </div>
 
   <script type="module">
+    import { addLessonMarkdownField } from "./lesson-markdown.js";
     import { bindWordReorder } from "./word-reorder.js?v=2";
 
     const $ = (id) => document.getElementById(id);
@@ -576,12 +577,13 @@
     let lessonParent = null;
     let lessonMutationRunning = false;
     let itemsById = new Map();
+    const lessonMarkdownFields = new Map();
     const LESSON_SECTIONS = [
       ["herhaling", "Herhaling"], ["nieuwe_letter", "Nieuwe letter"],
       ["tactiele_discriminatie", "Tactiele discriminatie"],
       ["auditieve_discriminatie", "Auditieve discriminatie"], ["auditieve_synthese", "Auditieve synthese"],
-      ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["schrijfmotoriek", "Schrijfmotoriek"],
-      ["auditieve_analyse", "Auditieve analyse"],
+      ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["auditieve_analyse", "Auditieve analyse"],
+      ["schrijfmotoriek", "Schrijfmotoriek"],
       ["dictee", "Dictee"],
       ["tekst_lezen_leesboek", "Tekst lezen leesboek"], ["tempolezen", "Tempolezen"],
       ["verwerking_werkboek", "Verwerking werkboek"]
@@ -598,7 +600,7 @@
         const input = document.createElement("textarea");
         input.id = `lesson_${key}_${field}`;
         input.setAttribute("aria-label", `${numberedLabel}: ${field === "instruction" ? "Instructie" : "Materiaal"}`);
-        cell.append(input);
+        lessonMarkdownFields.set(input.id, addLessonMarkdownField(cell, input));
         row.append(cell);
       }
       $("lessonRows").append(row);
@@ -1883,10 +1885,10 @@ function scheduleAutosave() {
         setVal("lessonGoal", plan.goal || "");
         for (const [key] of LESSON_SECTIONS) {
           for (const field of ["instruction", "material"]) {
-            setVal(`lesson_${key}_${field}`, plan.sections?.[key]?.[field] || "");
+            lessonMarkdownFields.get(`lesson_${key}_${field}`)(plan.sections?.[key]?.[field], !canManageLessons);
           }
         }
-        for (const input of $("letterLessonEditor").querySelectorAll("input, textarea")) input.readOnly = !canManageLessons;
+        for (const input of $("letterLessonEditor").querySelectorAll(".lesson-meta input, #lessonGoal")) input.readOnly = !canManageLessons;
         $("btnSaveLetterLesson").disabled = !canManageLessons;
         return;
       }
