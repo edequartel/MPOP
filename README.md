@@ -27,6 +27,8 @@ Deze handleiding beschrijft hoe je de MPOP++ editor gebruikt om items te bekijke
 
 De items zijn de woorden waar de methode uit bestaat.
 
+Admins en editors kunnen een woord verplaatsen door **Ctrl** of **Cmd** ingedrukt te houden en het woord naar een plek boven of onder een ander woord te slepen. De volgorde wordt opgeslagen voor iedereen. De letterlessen blijven bij hun woord. Voer hiervoor `supabase/migrations/202610050008_move_words.sql` uit in de Supabase SQL Editor vóór het uitrollen van de website.
+
 ## Letterlessen
 
 Met **+** naast een woord voeg je zelf een letterles toe, bijvoorbeeld `p` of `aa` bij `aap`. De pijlen bepalen de volgorde. Een letterles heeft een eigen formulier met Blok, Week, Les, Doel en de kolommen Onderdeel, Instructie en Materiaal. Wijzigingen worden automatisch opgeslagen.

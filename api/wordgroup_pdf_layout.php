@@ -42,8 +42,8 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
     "herhaling" => "Herhaling", "nieuwe_letter" => "Nieuwe letter",
     "tactiele_discriminatie" => "Tactiele discriminatie",
     "auditieve_discriminatie" => "Auditieve discriminatie", "auditieve_synthese" => "Auditieve synthese",
-    "schrijfmotoriek" => "Schrijf-\nmotoriek",
-    "letter_en_woorden_lezen" => "Letter en woorden lezen", "auditieve_analyse" => "Auditieve analyse",
+    "letter_en_woorden_lezen" => "Letter en woorden lezen", "schrijfmotoriek" => "Schrijf-\nmotoriek",
+    "auditieve_analyse" => "Auditieve analyse",
     "dictee" => "Dictee",
     "tekst_lezen_leesboek" => "Tekst lezen leesboek", "tempolezen" => "Tempolezen",
     "verwerking_werkboek" => "Verwerking werkboek"

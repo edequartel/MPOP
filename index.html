@@ -100,7 +100,8 @@
         <h2 class="section-title">2 Kies item</h2>
         <div id="itemsLoggedOut" class="muted">Log in om items te bekijken.</div>
         <div id="itemsLoggedIn" class="hidden">
-          <div id="listMsg" class="tiny mt-10"></div>
+          <div id="listMsg" class="tiny mt-10" role="status"></div>
+          <div id="wordReorderHint" class="tiny muted mt-8" hidden>Houd Ctrl of Cmd ingedrukt en sleep een woord om de volgorde te wijzigen.</div>
           <div class="list mt-8" id="itemsList"></div>
           <dialog id="letterLessonDialog" aria-labelledby="letterLessonHeading">
             <form id="letterLessonForm">
@@ -495,6 +496,8 @@
   </div>
 
   <script type="module">
+    import { bindWordReorder } from "./word-reorder.js";
+
     const $ = (id) => document.getElementById(id);
     const val = (id) => {
       const el = $(id);
@@ -577,8 +580,8 @@
       ["herhaling", "Herhaling"], ["nieuwe_letter", "Nieuwe letter"],
       ["tactiele_discriminatie", "Tactiele discriminatie"],
       ["auditieve_discriminatie", "Auditieve discriminatie"], ["auditieve_synthese", "Auditieve synthese"],
-      ["schrijfmotoriek", "Schrijfmotoriek"],
-      ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["auditieve_analyse", "Auditieve analyse"],
+      ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["schrijfmotoriek", "Schrijfmotoriek"],
+      ["auditieve_analyse", "Auditieve analyse"],
       ["dictee", "Dictee"],
       ["tekst_lezen_leesboek", "Tekst lezen leesboek"], ["tempolezen", "Tempolezen"],
       ["verwerking_werkboek", "Verwerking werkboek"]
@@ -1376,6 +1379,7 @@
         isAdminRole = role === "admin";
         isSoundCreatorRole = role === "soundcreator";
         canManageLessons = role === "admin" || role === "editor";
+        $("wordReorderHint").hidden = !canManageLessons;
         setEditorReadonly(isViewerRole);
         updateAdminOnlyAudioButtons();
 
@@ -1528,11 +1532,13 @@
         itemsById = new Map((data || []).map((item) => [String(item.id), item]));
         renderItems(data || []);
         msg($("listMsg"), `Loaded ${data?.length || 0} items.`);
+        return true;
       } catch (e) {
         const missingMigration = ["42703", "PGRST204"].includes(e.code);
         msg($("listMsg"), missingMigration
           ? "Voer eerst de Supabase-migratie voor letterlessen uit."
           : (e.message || String(e)), false);
+        return false;
       }
     }
 
@@ -1591,7 +1597,10 @@
           b.dataset.woordGroep = String(it.woord_groep);
         }
         b.append(label, dot);
-        b.onclick = () => selectItem(it.id);
+        b.onclick = (event) => {
+          if (b.hasAttribute("data-word-drag") && (event.ctrlKey || event.metaKey)) return;
+          selectItem(it.id);
+        };
         return b;
       };
       const makeTool = (symbol, label, onClick, disabled = false) => {
@@ -1609,6 +1618,7 @@
         const groupId = String(it.id);
         const group = document.createElement("div");
         group.className = "word-group";
+        group.dataset.wordId = groupId;
         const content = document.createElement("div");
         content.className = "word-group-content";
         content.id = `word-group-${groupId}`;
@@ -1634,7 +1644,9 @@
         };
         const row = document.createElement("div");
         row.className = "item-row";
-        row.append(toggle, makeItemButton(it));
+        const wordButton = makeItemButton(it);
+        if (canManageLessons) wordButton.dataset.wordDrag = "";
+        row.append(toggle, wordButton);
         if (canManageLessons) {
           row.append(makeTool("+", `Letterles toevoegen aan ${it.title}`, () => {
             lessonParent = it;
@@ -1676,6 +1688,32 @@
           sectionRow.append(sectionButton);
           content.append(sectionRow);
         }
+      }
+    }
+
+    bindWordReorder($("itemsList"), () => canManageLessons && !lessonMutationRunning, moveWord);
+
+    async function moveWord(sourceId, targetId, placeAfter) {
+      if (!canManageLessons || lessonMutationRunning) return;
+      lessonMutationRunning = true;
+      try {
+        await flushPendingItemChanges();
+        msg($("listMsg"), "Volgorde opslaan…");
+        const { data, error } = await sb.rpc("mpop_move_word", {
+          source_id: sourceId, target_id: targetId, place_after: placeAfter
+        });
+        if (error) throw error;
+        const change = data.find((row) => row.id === String(currentItem?.id));
+        if (change && change.previous_version === currentItem.version) {
+          currentItem = { ...currentItem, sort_index: change.sort_index, version: change.version, updated_at: change.updated_at };
+        }
+        if (await loadItems()) msg($("listMsg"), "Volgorde opgeslagen.");
+      } catch (error) {
+        msg($("listMsg"), error.code === "PGRST202"
+          ? "Voer eerst de Supabase-migratie voor het verplaatsen van woorden uit."
+          : (error.message || String(error)), false);
+      } finally {
+        lessonMutationRunning = false;
       }
     }
 
@@ -4690,7 +4728,7 @@ function scheduleAutosave() {
     // -----------------------------
     // Boot: restore from localStorage (optional convenience)
     // -----------------------------
-    window.addEventListener("load", async () => {
+    async function initEditor() {
       initFieldNameToggle();
       if (sbInitError) {
         msg($("authMsg"), `Supabase init failed: ${sbInitError.message || sbInitError}`, false);
@@ -4713,7 +4751,9 @@ function scheduleAutosave() {
         // no client yet (missing url/key) - ignore
         void refreshElevenLabsVoiceLabel();
       }
-    });
+    }
+    if (document.readyState === "complete") void initEditor();
+    else window.addEventListener("load", initEditor, { once: true });
     window.addEventListener("focus", () => { void refreshElevenLabsVoiceLabel(); });
     window.addEventListener("storage", (e) => {
       if (e.key === ELEVENLABS_STORAGE_KEYS.voiceId || e.key === ELEVENLABS_STORAGE_KEYS.voiceName) {

@@ -131,6 +131,10 @@ button.busy::after {
 .remote-file-dot[data-state="unknown"] { background:#7b8798; }
 .list { display:flex; flex-direction:column; gap:8px; }
 .word-group, .word-group-content { display:flex; flex-direction:column; gap:8px; }
+.word-group[data-word-dragging] { opacity:.45; }
+.word-group[data-word-drop="before"] { box-shadow:0 -3px #7cc4ff; }
+.word-group[data-word-drop="after"] { box-shadow:0 3px #7cc4ff; }
+#itemsList:has([data-word-dragging]), #itemsList:has([data-word-dragging]) button { cursor:grabbing; user-select:none; }
 .word-group-content[hidden] { display:none; }
 .itembtn { display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; }
 .itembtn[data-woord-groep="1"] { background:var(--wg1-bg); border-color:var(--wg1-border); }
