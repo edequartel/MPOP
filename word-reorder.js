@@ -53,6 +53,7 @@ export function bindWordReorder(list, canReorder, moveWord) {
     event.preventDefault();
     const { clientX: x, clientY: y, pointerId } = event;
     drag = { pointerId, source: button.closest(wordGroup), startX: x, startY: y, x, y, target: null, frame: 0 };
+    drag.source.dataset.wordDragging = "";
     list.setPointerCapture(pointerId);
   });
 
@@ -62,7 +63,6 @@ export function bindWordReorder(list, canReorder, moveWord) {
     drag.y = event.clientY;
     if (!drag.frame) {
       if (Math.hypot(drag.x - drag.startX, drag.y - drag.startY) < 5) return;
-      drag.source.dataset.wordDragging = "";
       drag.frame = requestAnimationFrame(scrollDuringDrag);
     }
     updateDropTarget();
@@ -91,7 +91,16 @@ export function bindWordReorder(list, canReorder, moveWord) {
   list.addEventListener("contextmenu", (event) => {
     if (drag || (event.ctrlKey && event.target.closest(wordButton) && canReorder())) event.preventDefault();
   });
+  function showReorderMode(event) {
+    list.toggleAttribute("data-word-reorder-ready", canReorder() && (event.ctrlKey || event.metaKey));
+  }
   window.addEventListener("keydown", (event) => {
+    showReorderMode(event);
     if (event.key === "Escape" && drag) endDrag();
+  });
+  window.addEventListener("keyup", showReorderMode);
+  window.addEventListener("blur", () => {
+    list.removeAttribute("data-word-reorder-ready");
+    if (drag) endDrag();
   });
 }

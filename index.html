@@ -20,7 +20,7 @@
     }
   </script>
 
-  <link id="appStyles" rel="stylesheet" href="styles.css" />
+  <link id="appStyles" rel="stylesheet" href="styles.css?v=word-reorder-2" />
 </head>
 
 <body>
@@ -496,7 +496,7 @@
   </div>
 
   <script type="module">
-    import { bindWordReorder } from "./word-reorder.js";
+    import { bindWordReorder } from "./word-reorder.js?v=2";
 
     const $ = (id) => document.getElementById(id);
     const val = (id) => {
@@ -1707,14 +1707,15 @@
         if (change && change.previous_version === currentItem.version) {
           currentItem = { ...currentItem, sort_index: change.sort_index, version: change.version, updated_at: change.updated_at };
         }
-        if (await loadItems()) msg($("listMsg"), "Volgorde opgeslagen.");
       } catch (error) {
         msg($("listMsg"), error.code === "PGRST202"
           ? "Voer eerst de Supabase-migratie voor het verplaatsen van woorden uit."
           : (error.message || String(error)), false);
+        return;
       } finally {
         lessonMutationRunning = false;
       }
+      if (await loadItems()) msg($("listMsg"), "Volgorde opgeslagen.");
     }
 
     async function flushPendingItemChanges() {
