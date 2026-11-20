@@ -6,7 +6,7 @@ require_once __DIR__ . "/../api/wordgroup_pdf_layout.php";
 $sections = [
   "herhaling", "nieuwe_letter", "schrijfmotoriek", "tactiele_discriminatie",
   "auditieve_discriminatie", "auditieve_synthese", "letter_en_woorden_lezen",
-  "auditieve_analyse", "dictee", "letters", "woord", "zin",
+  "auditieve_analyse", "dictee",
   "tekst_lezen_leesboek", "tempolezen", "verwerking_werkboek"
 ];
 $plan = ["block" => 1, "week" => 2, "lesson" => 3,
@@ -38,7 +38,7 @@ $overflow["sections"]["herhaling"]["instruction"] = implode("\n", array_map(
   static fn(int $index): string => "CONTROLE-" . str_pad((string)$index, 3, "0", STR_PAD_LEFT) . ": Bespreek deze oefening en controleer samen het resultaat.", range(1, 100)
 ));
 $overflow["sections"]["herhaling"]["material"] = "EenLangeMateriaalnaamZonderSpaties" . str_repeat("abcdefghij", 25);
-$overflow["sections"]["zin"]["instruction"] = "Tekst met accenten: één, naïef en coördinatie. <script> blijft gewone tekst.";
+$overflow["sections"]["dictee"]["instruction"] = "Tekst met accenten: één, naïef en coördinatie. <script> blijft gewone tekst.";
 file_put_contents($directory . "/wordgroup-overflow-smoke.pdf", render_wordgroup_pdf(["title" => "aap"], [
   ["letter" => "p", "lesson_order" => 1, "lesson_plan" => $overflow]
 ]));

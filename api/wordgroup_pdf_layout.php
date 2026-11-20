@@ -43,7 +43,7 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
     "schrijfmotoriek" => "Schrijf-\nmotoriek", "tactiele_discriminatie" => "Tactiele discriminatie",
     "auditieve_discriminatie" => "Auditieve discriminatie", "auditieve_synthese" => "Auditieve synthese",
     "letter_en_woorden_lezen" => "Letter en woorden lezen", "auditieve_analyse" => "Auditieve analyse",
-    "dictee" => "Dictee", "letters" => "Letters", "woord" => "Woord", "zin" => "Zin",
+    "dictee" => "Dictee",
     "tekst_lezen_leesboek" => "Tekst lezen leesboek", "tempolezen" => "Tempolezen",
     "verwerking_werkboek" => "Verwerking werkboek"
   ];

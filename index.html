@@ -578,7 +578,7 @@
       ["schrijfmotoriek", "Schrijfmotoriek"], ["tactiele_discriminatie", "Tactiele discriminatie"],
       ["auditieve_discriminatie", "Auditieve discriminatie"], ["auditieve_synthese", "Auditieve synthese"],
       ["letter_en_woorden_lezen", "Letter en woorden lezen"], ["auditieve_analyse", "Auditieve analyse"],
-      ["dictee", "Dictee"], ["letters", "Letters"], ["woord", "Woord"], ["zin", "Zin"],
+      ["dictee", "Dictee"],
       ["tekst_lezen_leesboek", "Tekst lezen leesboek"], ["tempolezen", "Tempolezen"],
       ["verwerking_werkboek", "Verwerking werkboek"]
     ];
@@ -1972,7 +1972,7 @@ function scheduleAutosave() {
       };
       const plan = {
         block: number("lessonBlock"), week: number("lessonWeek"), lesson: number("lessonNumber"),
-        goal: val("lessonGoal"), sections: {}
+        goal: val("lessonGoal"), sections: { ...currentItem.lesson_plan?.sections }
       };
       for (const [key] of LESSON_SECTIONS) {
         plan.sections[key] = {
