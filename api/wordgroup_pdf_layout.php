@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . "/../vendor/autoload.php";
+require_once __DIR__ . "/wordgroup_pdf_markdown.php";
 
 use Dompdf\Dompdf;
 use Dompdf\FontMetrics;
@@ -118,8 +119,8 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
       $section = is_array($plan["sections"][$key] ?? null) ? $plan["sections"][$key] : [];
       $columns = [
         wordgroup_pdf_lines($label, $metrics, $bold, $columnWidths[0] - 10, 9.5),
-        wordgroup_pdf_lines(wordgroup_pdf_text($section["instruction"] ?? ""), $metrics, $regular, $columnWidths[1] - 10, $size),
-        wordgroup_pdf_lines(wordgroup_pdf_text($section["material"] ?? ""), $metrics, $regular, $columnWidths[2] - 10, $size)
+        (new WordgroupPdfMarkdown($metrics, $columnWidths[1] - 10, $size))->lines(wordgroup_pdf_text($section["instruction"] ?? "")),
+        (new WordgroupPdfMarkdown($metrics, $columnWidths[2] - 10, $size))->lines(wordgroup_pdf_text($section["material"] ?? ""))
       ];
       $offset = 0;
       $totalLines = max(array_map("count", $columns));
@@ -136,7 +137,10 @@ function render_wordgroup_pdf(array $word, array $lessons): string {
         $height = max(array_map("count", $rowColumns)) * $lineHeight + 12;
         foreach ($rowColumns as $column => $lines) {
           foreach ($lines as $lineIndex => $line) {
-            $canvas->text($columnX[$column] + 5, $y + 6 + $lineIndex * $lineHeight, $line, $column === 0 ? $bold : $regular, $column === 0 ? 9.5 : $size, $ink);
+            $lineX = $columnX[$column] + 5;
+            $lineY = $y + 6 + $lineIndex * $lineHeight;
+            if ($column === 0) $canvas->text($lineX, $lineY, $line, $bold, 9.5, $ink);
+            else WordgroupPdfMarkdown::draw($canvas, $line, $lineX, $lineY, $ink, $accent);
           }
         }
         for ($i = 1; $i < 3; $i++) $canvas->line($columnX[$i], $y, $columnX[$i], $y + $height, $rule, .4);

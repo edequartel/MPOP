@@ -17,7 +17,8 @@ foreach ($sections as $key) {
     "material" => "Letterbord\nLetterkaart\nSchrift en potlood"
   ];
 }
-$plan["sections"]["herhaling"]["instruction"] = "Herhaal de eerder aangeleerde letters.\n\n- Wijs de letter aan op het letterbord.\n- Laat het kind de klank zeggen en het gebaar maken.\n- Lees daarna samen de bekende woorden.\n\nDenk aan individuele beurten.";
+$plan["sections"]["herhaling"]["instruction"] = "### Eerder aangeleerde letters\n\n- Wijs de **letter** aan op het letterbord.\n- Laat het kind de *klank* zeggen en het gebaar maken.\n  3. Lees daarna samen de bekende woorden.\n\n> Denk aan individuele beurten.";
+$plan["sections"]["herhaling"]["material"] = "**Letterbord**\nLetterkaart `p`\n[Extra oefeningen](https://example.com/oefeningen)";
 $second = $plan;
 $second["lesson"] = 4;
 $second["goal"] = "Leren lezen en schrijven van de lettercombinatie aa.";
@@ -35,10 +36,11 @@ file_put_contents($directory . "/wordgroup-single-letter-smoke.pdf", render_word
 $overflow = $plan;
 $overflow["goal"] = str_repeat("Een uitgebreid doel met meerdere regels, zodat ook dit veld veilig op vervolgpagina's wordt weergegeven. ", 70);
 $overflow["sections"]["herhaling"]["instruction"] = implode("\n", array_map(
-  static fn(int $index): string => "CONTROLE-" . str_pad((string)$index, 3, "0", STR_PAD_LEFT) . ": Bespreek deze oefening en controleer samen het resultaat.", range(1, 100)
+  static fn(int $index): string => "- **CONTROLE-" . str_pad((string)$index, 3, "0", STR_PAD_LEFT) . "**: Bespreek deze oefening en controleer samen het resultaat.", range(1, 100)
 ));
 $overflow["sections"]["herhaling"]["material"] = "EenLangeMateriaalnaamZonderSpaties" . str_repeat("abcdefghij", 25);
-$overflow["sections"]["dictee"]["instruction"] = "Tekst met accenten: één, naïef en coördinatie. <script> blijft gewone tekst.";
+$overflow["sections"]["dictee"]["instruction"] = "Tekst met accenten: één, naïef en coördinatie. <script> blijft gewone tekst.\n\n" .
+  "![Afbeelding bij het dictee](https://example.com/dictee.png)\n\n[Onveilige link](javascript:alert%281%29)";
 file_put_contents($directory . "/wordgroup-overflow-smoke.pdf", render_wordgroup_pdf(["title" => "aap"], [
   ["letter" => "p", "lesson_order" => 1, "lesson_plan" => $overflow]
 ]));

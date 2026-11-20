@@ -3,7 +3,7 @@
         'name' => 'tastenbraille/mpop-ssoc',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b692fe2756e167e5f51b2e1ced6de134c846a493',
+        'reference' => '10eba55788047ba4c04365b17d7e3310e831034d',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -37,6 +37,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'erusev/parsedown' => array(
+            'pretty_version' => '1.8.0',
+            'version' => '1.8.0.0',
+            'reference' => '96baaad00f71ba04d76e45b4620f54d3beabd6f7',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../erusev/parsedown',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'masterminds/html5' => array(
             'pretty_version' => '2.10.0',
             'version' => '2.10.0.0',
@@ -58,7 +67,7 @@
         'tastenbraille/mpop-ssoc' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b692fe2756e167e5f51b2e1ced6de134c846a493',
+            'reference' => '10eba55788047ba4c04365b17d7e3310e831034d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
